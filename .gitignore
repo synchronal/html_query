@@ -1,0 +1,12 @@
+*.ez
+.medic/.doctor.out
+.medic/skipped
+/.fetch
+/cover/
+/deps/
+/doc/
+/priv/plts
+/tmp/
+/_build/
+erl_crash.dump
+html_query-*.tar

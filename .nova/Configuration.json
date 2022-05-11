@@ -1,0 +1,7 @@
+{
+  "index.ignored_file_patterns" : [
+    "_build",
+    "deps",
+    "doc"
+  ]
+}
