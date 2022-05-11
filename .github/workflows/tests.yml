@@ -106,27 +106,3 @@ jobs:
       - name: Check Elixir formatting
         run: mix format --check-formatted
         working-directory: .
-  publish:
-    name: Publish to Hex
-    if: github.ref == 'refs/heads/main'
-    needs:
-      - test
-      - linter
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          elixir-version: "1.13.4"
-          otp-version: "24.3.4"
-      - name: Cache deps
-        uses: actions/cache@v2
-        with:
-          path: deps
-          key: ${{ runner.os }}-deps-v1-${{ hashFiles('**/mix.lock', '.tool-versions') }}
-      - name: Cache _build
-        uses: actions/cache@v2
-        with:
-          path: _build
-          key: ${{ runner.os }}-build-v1-${{ hashFiles('**/mix.lock', '.tool-versions') }}
