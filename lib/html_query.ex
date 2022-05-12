@@ -114,7 +114,7 @@ defmodule HtmlQuery do
     html
     |> parse()
     |> first!("Consider using Enum.map(html, &#{@module_name}.attr(&1, #{inspect(attr)}))")
-    |> Floki.attribute(Moar.Atom.to_string(attr))
+    |> Floki.attribute(to_string(attr))
     |> List.first()
   end
 
@@ -143,15 +143,15 @@ defmodule HtmlQuery do
 
   ```elixir
   iex> html = ~s|<form> <input type="text" name="color" value="green"> <textarea name="desc">A tree</textarea> </form>|
-  iex> HtmlQuery.form_fields(html, "form")
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
   %{color: "green", desc: "A tree"}
   ```
   """
-  @spec form_fields(html(), selector()) :: map()
-  def form_fields(html, selector) do
+  @spec form_fields(html()) :: map()
+  def form_fields(html) do
     %{}
-    |> input_values(html, selector)
-    |> textarea_values(html, selector)
+    |> form_field_values(html, [type: "text"], &attr(&1, "value"))
+    |> form_field_values(html, :textarea, &text/1)
     |> Moar.Map.atomize_keys()
   end
 
@@ -205,17 +205,17 @@ defmodule HtmlQuery do
   `html` can be an HTML string, a Floki HTML tree, a Floki HTML node, or any struct that implements `String.Chars`.
   """
   @spec parse(html()) :: Floki.html_tree()
-  def parse(html_string) when is_binary(html_string), do: html_string |> Floki.parse_fragment!()
-  def parse(html_tree) when is_list(html_tree), do: html_tree
+  def parse(html) when is_binary(html), do: html |> Floki.parse_fragment!()
+  def parse(html) when is_list(html), do: html
   def parse({element, attrs, contents}), do: [{element, attrs, contents}]
-  def parse(%_{} = struct), do: struct |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse()
+  def parse(%_{} = html), do: html |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse()
 
   @doc """
   Parses an HTML document using `Floki.parse_document!/1`, returning a
   [Floki HTML tree](https://hexdocs.pm/floki/Floki.html#t:html_tree/0).
   """
   @spec parse_doc(binary()) :: Floki.html_tree()
-  def parse_doc(html_string), do: html_string |> Floki.parse_document!()
+  def parse_doc(html), do: html |> Floki.parse_document!()
 
   @doc """
   Pretty-ifies `html` using `Floki.raw_html/2` and its `pretty: true` option.
@@ -225,49 +225,11 @@ defmodule HtmlQuery do
 
   # # #
 
-  defp attrs_to_map(list, key_attr, value_attr, key_transformer) do
-    Map.new(list, fn element ->
-      key = Floki.attribute(element, key_attr) |> List.first() |> key_transformer.()
-
-      value =
-        if value_attr == :text,
-          do: HtmlQuery.HtmlTransformer.to_text(element),
-          else: Floki.attribute(element, value_attr) |> List.first()
-
-      {key, value}
-    end)
-  end
-
   @spec extract_meta_tags(html()) :: [map()]
-  defp extract_meta_tags(html) do
-    all(html, "meta") |> Enum.map(fn {"meta", attrs, _} -> Map.new(attrs) end)
-  end
+  defp extract_meta_tags(html),
+    do: all(html, "meta") |> Enum.map(fn {"meta", attrs, _} -> Map.new(attrs) end)
 
-  # # #
-
-  defp input_values(acc, html, selector) do
-    html
-    |> all(HtmlQuery.Css.selector(selector) <> " input[type=text]")
-    |> attrs_to_map("name", "value", &unwrap_input_name/1)
-    |> Map.merge(acc, fn _k, a, b -> List.flatten([a, b]) end)
-  end
-
-  defp textarea_values(acc, html, selector) do
-    html
-    |> all(HtmlQuery.Css.selector(selector) <> " textarea")
-    |> attrs_to_map("name", :text, &unwrap_input_name/1)
-    |> Map.merge(acc, fn _k, a, b -> List.flatten([a, b]) end)
-  end
-
-  defp unwrap_input_name(input_name) do
-    case Regex.run(~r|.*\[(.*)\]|, input_name) do
-      [_, unwrapped] when not is_nil(unwrapped) -> unwrapped
-      _ -> input_name
-    end
-  end
-
-  # # #
-
+  @spec first!(html(), binary() | nil) :: html()
   defp first!(html, hint \\ nil)
 
   defp first!([], _hint), do: raise("Expected a single HTML node but found none")
@@ -281,5 +243,21 @@ defmodule HtmlQuery do
     #{pretty(html)}
     #{hint}
     """
+  end
+
+  @spec form_field_values(map(), html(), selector(), (html() -> binary())) :: map()
+  defp form_field_values(acc, html, selector, value_fn) do
+    html
+    |> all(selector)
+    |> Map.new(fn input -> {input |> attr("name") |> unwrap_input_name(), value_fn.(input)} end)
+    |> Map.merge(acc, fn _k, a, b -> List.flatten([a, b]) end)
+  end
+
+  @spec unwrap_input_name(binary()) :: binary()
+  defp unwrap_input_name(input_name) do
+    case Regex.run(~r|.*\[(.*)\]|, input_name) do
+      [_, unwrapped] when not is_nil(unwrapped) -> unwrapped
+      _ -> input_name
+    end
   end
 end

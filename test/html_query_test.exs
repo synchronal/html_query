@@ -58,6 +58,48 @@ defmodule HtmlQueryTest do
     end
   end
 
+  describe "attr" do
+    @html """
+    <div class="profile-list" id="profiles">
+      <div class="profile admin" id="alice">
+        <div class="name">Alice</div>
+      </div>
+      <div class="profile" id="billy">
+        <div class="name">Billy</div>
+      </div>
+    </div>
+    """
+
+    test "returns the value of an attr from the outermost element of an HTML node" do
+      @html |> Hq.find("#alice") |> Hq.attr("class") |> assert_eq("profile admin")
+    end
+
+    test "returns nil if the attr does not exist" do
+      @html |> Hq.find("#alice") |> Hq.attr("foo") |> assert_eq(nil)
+    end
+
+    test "raises if the first argument is a list or HTML tree" do
+      assert_raise RuntimeError,
+                   """
+                   Expected a single HTML node but got:
+
+                   <div class="profile admin" id="alice">
+                     <div class="name">
+                       Alice
+                     </div>
+                   </div>
+                   <div class="profile" id="billy">
+                     <div class="name">
+                       Billy
+                     </div>
+                   </div>
+
+                   Consider using Enum.map(html, &HtmlQuery.attr(&1, "id"))
+                   """,
+                   fn -> @html |> Hq.all(".profile") |> Hq.attr("id") end
+    end
+  end
+
   describe "find" do
     test "finds the first matching element, and returns it as an HTML node" do
       html = """
@@ -108,89 +150,6 @@ defmodule HtmlQueryTest do
     end
   end
 
-  describe "attr" do
-    @html """
-    <div class="profile-list" id="profiles">
-      <div class="profile admin" id="alice">
-        <div class="name">Alice</div>
-      </div>
-      <div class="profile" id="billy">
-        <div class="name">Billy</div>
-      </div>
-    </div>
-    """
-
-    test "returns the value of an attr from the outermost element of an HTML node" do
-      @html |> Hq.find("#alice") |> Hq.attr("class") |> assert_eq("profile admin")
-    end
-
-    test "returns nil if the attr does not exist" do
-      @html |> Hq.find("#alice") |> Hq.attr("foo") |> assert_eq(nil)
-    end
-
-    test "raises if the first argument is a list or HTML tree" do
-      assert_raise RuntimeError,
-                   """
-                   Expected a single HTML node but got:
-
-                   <div class="profile admin" id="alice">
-                     <div class="name">
-                       Alice
-                     </div>
-                   </div>
-                   <div class="profile" id="billy">
-                     <div class="name">
-                       Billy
-                     </div>
-                   </div>
-
-                   Consider using Enum.map(html, &HtmlQuery.attr(&1, "id"))
-                   """,
-                   fn -> @html |> Hq.all(".profile") |> Hq.attr("id") end
-    end
-  end
-
-  describe "text" do
-    @html """
-    <div>
-      <p>P1</p>
-      <p>P2 <span>a span</span></p>
-      <p>P3</p>
-    </div>
-    """
-
-    test "returns the text value of the HTML node" do
-      @html |> Hq.find("div") |> Hq.text() |> assert_eq("P1 P2  a span P3")
-    end
-
-    test "requires the use of `Enum.map` to get a list" do
-      @html |> Hq.all("p") |> Enum.map(&Hq.text/1) |> assert_eq(["P1", "P2  a span", "P3"])
-    end
-
-    test "raises if a list or HTML tree is passed in" do
-      assert_raise RuntimeError,
-                   """
-                   Expected a single HTML node but got:
-
-                   <p>
-                     P1
-                   </p>
-                   <p>
-                     P2
-                     <span>
-                       a span
-                     </span>
-                   </p>
-                   <p>
-                     P3
-                   </p>
-
-                   Consider using Enum.map(html, &HtmlQuery.text/1)
-                   """,
-                   fn -> @html |> Hq.all("p") |> Hq.text() end
-    end
-  end
-
   describe "form_fields" do
     test "returns all the form fields as a name -> value map" do
       html = """
@@ -201,7 +160,9 @@ defmodule HtmlQueryTest do
       </form>
       """
 
-      Hq.form_fields(html, test_role: "test-form")
+      html
+      |> Hq.find(test_role: "test-form")
+      |> Hq.form_fields()
       |> assert_eq(%{name: "alice", age: "100", about: "Alice is 100"})
     end
   end
@@ -290,6 +251,47 @@ defmodule HtmlQueryTest do
         </span>
       </div>
       """)
+    end
+  end
+
+  describe "text" do
+    @html """
+    <div>
+      <p>P1</p>
+      <p>P2 <span>a span</span></p>
+      <p>P3</p>
+    </div>
+    """
+
+    test "returns the text value of the HTML node" do
+      @html |> Hq.find("div") |> Hq.text() |> assert_eq("P1 P2  a span P3")
+    end
+
+    test "requires the use of `Enum.map` to get a list" do
+      @html |> Hq.all("p") |> Enum.map(&Hq.text/1) |> assert_eq(["P1", "P2  a span", "P3"])
+    end
+
+    test "raises if a list or HTML tree is passed in" do
+      assert_raise RuntimeError,
+                   """
+                   Expected a single HTML node but got:
+
+                   <p>
+                     P1
+                   </p>
+                   <p>
+                     P2
+                     <span>
+                       a span
+                     </span>
+                   </p>
+                   <p>
+                     P3
+                   </p>
+
+                   Consider using Enum.map(html, &HtmlQuery.text/1)
+                   """,
+                   fn -> @html |> Hq.all("p") |> Hq.text() end
     end
   end
 end

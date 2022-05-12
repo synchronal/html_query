@@ -7,28 +7,28 @@ Delegates the hard work to [Floki](https://hex.pm/packages/floki).
 iex> alias HtmlQuery, as: Hq
 
 iex> html = """
-<select test-role="breakfast">
-  <option value="apple-pie">Apple Pie</option>
-  <option value="banana-smoothie" selected>Banana Smoothie</option>
-  <option value="cherry-a-la-mode">Cherry à la Mode</option>
-</select>
+  <form id="profile" test-role="profile">
+    <label>Name <input name="name" type="text" value="Fido"> </label>
+    <label>Age <input name="age" type="text" value="10"> </label>
+    <label>Bio <textarea name="bio">Fido likes long walks and playing fetch.</textarea> </label>
+  </form>
+</form>
 """
 
-iex> html |> Hq.find(test_role: "breakfast")
-{"select", [{"test-role", "breakfast"}],
+iex> html |> Hq.find!(test_role: "profile")
+{"form", [{"id", "profile"}, {"test-role", "profile"}],
  [
-   {"option", [{"value", "apple-pie"}], ["Apple Pie"]},
-   {"option", [{"value", "banana-smoothie"}, {"selected", "selected"}],
-    ["Banana Smoothie"]},
-   {"option", [{"value", "cherry-a-la-mode"}], ["Cherry à la Mode"]}
+   {"label", [], [ "Name ", {"input", [{"name", "name"}, {"type", "text"}, {"value", "Fido"}], []} ]},
+   {"label", [], [ "Age ", {"input", [{"name", "age"}, {"type", "text"}, {"value", "10"}], []} ]},
+   {"label", [], [ "Bio ", {"textarea", [{"name", "bio"}], ["Fido likes long walks and playing fetch."]} ]}
  ]
 }
 
-iex> html |> Hq.all("[test-role=breakfast] option") |> Enum.map(&Hq.text/1)
-["Apple Pie", "Banana Smoothie", "Cherry à la Mode"]
+iex> html |> Hq.all("input[type=text]") |> Enum.map(&Hq.attr(&1, "value"))
+["Fido", "10"]
 
-iex> html |> Hq.find!("[test-role=breakfast] option[selected]") |> Hq.attr("value")
-"banana-smoothie"
+iex> html |> Hq.find(test_role: "profile") |> Hq.form_fields()
+%{age: "10", bio: "Fido likes long walks and playing fetch.", name: "Fido"}
 ```
 
 ## API Docs
