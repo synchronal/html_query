@@ -150,7 +150,7 @@ defmodule HtmlQuery do
   @spec form_fields(html()) :: map()
   def form_fields(html) do
     %{}
-    |> form_field_values(html, [type: "text"], &attr(&1, "value"))
+    |> form_field_values(html, "input[value]", &attr(&1, "value"))
     |> form_field_values(html, :textarea, &text/1)
     |> Moar.Map.atomize_keys()
   end
@@ -249,14 +249,24 @@ defmodule HtmlQuery do
   defp form_field_values(acc, html, selector, value_fn) do
     html
     |> all(selector)
-    |> Map.new(fn input -> {input |> attr("name") |> unwrap_input_name(), value_fn.(input)} end)
-    |> Map.merge(acc, fn _k, a, b -> List.flatten([a, b]) end)
+    |> Enum.reduce(acc, &form_field_value(&2, &1, value_fn))
+    |> Moar.Map.deep_atomize_keys()
   end
 
-  @spec unwrap_input_name(binary()) :: binary()
+  @spec form_field_value(map(), html(), (html() -> binary())) :: map()
+  defp form_field_value(acc, input, value_fn) do
+    value = value_fn.(input)
+
+    case input |> attr("name") |> unwrap_input_name() do
+      {key1, key2} -> Moar.Map.deep_merge(acc, %{key1 => %{key2 => value}})
+      key -> Moar.Map.deep_merge(acc, %{key => value})
+    end
+  end
+
+  @spec unwrap_input_name(binary()) :: binary() | {binary(), binary()}
   defp unwrap_input_name(input_name) do
-    case Regex.run(~r|.*\[(.*)\]|, input_name) do
-      [_, unwrapped] when not is_nil(unwrapped) -> unwrapped
+    case Regex.run(~r|(.*)\[(.*)\]|, input_name) do
+      [_, parent, child] -> {parent, child}
       _ -> input_name
     end
   end

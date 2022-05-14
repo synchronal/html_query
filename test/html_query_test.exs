@@ -151,19 +151,37 @@ defmodule HtmlQueryTest do
   end
 
   describe "form_fields" do
-    test "returns all the form fields as a name -> value map" do
-      html = """
+    test "returns textareas and inputs that have a `value` attr as a name -> value map" do
+      """
       <form test-role="test-form">
-        <input type="text" name="person[name]" value="alice">
-        <input type="text" name="person[age]" value="100">
-        <textarea name="person[about]">Alice is 100</textarea>
+        <input type="text" name="name" value="alice">
+        <input type="number" name="age" value="100">
+        <input type="email" name="email" value="">
+        <textarea name="about">Alice is 100</textarea>
+        <input type="submit" name="save">
       </form>
       """
-
-      html
       |> Hq.find(test_role: "test-form")
       |> Hq.form_fields()
-      |> assert_eq(%{name: "alice", age: "100", about: "Alice is 100"})
+      |> assert_eq(%{name: "alice", age: "100", email: "", about: "Alice is 100"})
+    end
+
+    test "returns a nested map when names are in x[y] format" do
+      """
+      <form>
+        <input type="text" name="_csrf" value="_123xyz">
+        <input type="text" name="person[name]" value="alice">
+        <input type="email" name="auth[email]" value="alice@example.com">
+        <input type="password" name="auth[password]" value="password123">
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{
+        _csrf: "_123xyz",
+        person: %{name: "alice"},
+        auth: %{email: "alice@example.com", password: "password123"}
+      })
     end
   end
 
