@@ -55,7 +55,7 @@ defmodule HtmlQuery do
   @module_name __MODULE__ |> Module.split() |> Enum.join(".")
 
   @type attr :: binary() | atom()
-  @type html :: binary() | Floki.html_tree()
+  @type html :: binary() | Floki.html_tree() | Floki.html_node()
   @type selector :: binary() | keyword() | atom()
 
   # # #
