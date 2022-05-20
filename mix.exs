@@ -63,7 +63,7 @@ defmodule HtmlQuery.MixProject do
 
   defp package do
     [
-      files: ~w[lib .formatters.exs mix.exs README* LICENSE* CHANGELOG*],
+      files: ~w[lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*],
       licenses: ["MIT"],
       links: %{"GitHub" => @scm_url},
       maintainers: ["synchronal.dev", "Erik Hanson", "Eric Saxby"]
