@@ -15,7 +15,10 @@ defmodule HtmlQuery do
   The `attr/2` function can be used to extract attr values, and the `text/1` function can be used to extract
   the text of an HTML fragment.
 
-  If you use HtmlQuery a lot, you may want to alias it to the recommended shortcut "Hq": `alias HtmlQuery, as: Hq`.
+  If you use HtmlQuery a lot, you may want to alias it to the recommended shortcut "Hq":
+  ```elixir
+  alias HtmlQuery, as: Hq
+  ```
 
   ## Examples
 
@@ -43,7 +46,7 @@ defmodule HtmlQuery do
   ["apples", "bananas"]
   ```
 
-  Use a keyword list as the selector:
+  Use a keyword list as the selector (see `HtmlQuery.CSS` for details on selectors):
 
   ```elixir
   iex> html = ~s|<div> <a href="/logout" test-role="logout-link">logout</a> </div>|
@@ -145,6 +148,14 @@ defmodule HtmlQuery do
   iex> html = ~s|<form> <input type="text" name="color" value="green"> <textarea name="desc">A tree</textarea> </form>|
   iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
   %{color: "green", desc: "A tree"}
+  ```
+
+  If form field names are in `foo[bar]` format, then `foo` becomes a key to a nested map containing `bar`:
+
+  ```elixir
+  iex> html = ~s|<form> <input type="text" name="profile[name]" value="fido"> <input type="text" name="profile[age]" value="10"> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{profile: %{name: "fido", age: "10"}}
   ```
   """
   @spec form_fields(html()) :: map()

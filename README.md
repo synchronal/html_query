@@ -33,7 +33,7 @@ iex> html |> Hq.find(test_role: "profile") |> Hq.form_fields()
 
 ## API Docs
 
-<https://hexdocs.pm/html_query>
+<https://hexdocs.pm/html_query/HtmlQuery.html>
 
 ## Installation
 
