@@ -61,7 +61,7 @@ defmodule HtmlQueryTest do
   describe "attr" do
     @html """
     <div class="profile-list" id="profiles">
-      <div class="profile admin" id="alice">
+      <div class="profile admin" id="alice" test-role="admin-profile">
         <div class="name">Alice</div>
       </div>
       <div class="profile" id="billy">
@@ -74,6 +74,10 @@ defmodule HtmlQueryTest do
       @html |> Hq.find("#alice") |> Hq.attr("class") |> assert_eq("profile admin")
     end
 
+    test "when attr is an atom, underscores are converted to dashes" do
+      @html |> Hq.find("#alice") |> Hq.attr(:test_role) |> assert_eq("admin-profile")
+    end
+
     test "returns nil if the attr does not exist" do
       @html |> Hq.find("#alice") |> Hq.attr("foo") |> assert_eq(nil)
     end
@@ -83,7 +87,7 @@ defmodule HtmlQueryTest do
                    """
                    Expected a single HTML node but got:
 
-                   <div class="profile admin" id="alice">
+                   <div class="profile admin" id="alice" test-role="admin-profile">
                      <div class="name">
                        Alice
                      </div>
@@ -220,32 +224,52 @@ defmodule HtmlQueryTest do
     end
   end
 
-  describe "parse" do
-    test "can parse a string" do
+  describe "parse and parse_doc" do
+    test "`parse` can parse a string" do
       "<div>hi</div>" |> Hq.parse() |> assert_eq([{"div", [], ["hi"]}])
     end
 
-    test "when given a list, assumes it is an already-parsed floki html tree" do
+    test "`parse_doc` can parse a string" do
+      "<html><body>hi</body></html>" |> Hq.parse_doc() |> assert_eq([{"html", [], [{"body", [], ["hi"]}]}])
+    end
+
+    test "when given a list, `parse` assumes it is an already-parsed floki html tree" do
       [{"div", [], ["hi"]}] |> Hq.parse() |> assert_eq([{"div", [], ["hi"]}])
     end
 
-    test "when given a threeple, assumes it is a floki element" do
+    test "when given a list, `parse_doc` assumes it is an already-parsed floki html tree" do
+      [{"html", [], [{"body", [], ["hi"]}]}] |> Hq.parse_doc() |> assert_eq([{"html", [], [{"body", [], ["hi"]}]}])
+    end
+
+    test "when given a threeple, `parse` assumes it is a floki element" do
       {"div", [], ["hi"]} |> Hq.parse() |> assert_eq([{"div", [], ["hi"]}])
     end
 
-    test "can parse any struct that implements String.Chars" do
+    test "`parse` can parse any struct that implements String.Chars" do
       %Test.Etc.TestDiv{contents: "hi"} |> Hq.parse() |> assert_eq([{"div", [], ["hi"]}])
+    end
+
+    test "`parse_doc` can parse any struct that implements String.Chars" do
+      %Test.Etc.TestDiv{contents: "hi"} |> Hq.parse_doc() |> assert_eq([{"div", [], ["hi"]}])
     end
 
     defmodule FooStruct do
       defstruct [:foo]
     end
 
-    test "cannot parse structs that don't implement String.Chars" do
+    test "`parse` cannot parse structs that don't implement String.Chars" do
       assert_raise RuntimeError,
                    "Expected %HtmlQueryTest.FooStruct{foo: 1} to implement protocol String.Chars",
                    fn ->
                      %FooStruct{foo: 1} |> Hq.parse()
+                   end
+    end
+
+    test "`parse_doc` cannot parse structs that don't implement String.Chars" do
+      assert_raise RuntimeError,
+                   "Expected %HtmlQueryTest.FooStruct{foo: 1} to implement protocol String.Chars",
+                   fn ->
+                     %FooStruct{foo: 1} |> Hq.parse_doc()
                    end
     end
   end

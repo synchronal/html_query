@@ -4,16 +4,42 @@ defmodule HtmlQuery do
   @moduledoc """
   Some simple HTML query functions. Delegates the hard work to [Floki](https://hex.pm/packages/floki).
 
-  The main query functions are:
+  ## Data types
 
-  * `all/2`: returns all elements matching the selector
-  * `find/2`: returns the first element that matches the selector
-  * `find!/2`: like `find/2` but raises if more than one element matches the selector
+  All functions accept HTML in the form of a string, a Floki HTML tree, or a Floki HTML node.
+  Others expect only a Floki HTML node or a Floki HTML tree. See `t:HtmlQuery.html/0`.
 
-  Selectors can be a valid CSS selector string, or can be a keyword list. See `HtmlQuery.Css` for keyword list syntax.
+  Some functions take a CSS selector, which can be a string, a keyword list, or a list.
+  See `t:HtmlQuery.Css.selector/0`.
 
-  The `attr/2` function can be used to extract attr values, and the `text/1` function can be used to extract
-  the text of an HTML fragment.
+  ## Main query functions
+
+  The main query functions take an HTML string or some parsed HTML, and a selector.
+
+  | `all/2`         | return all elements matching the selector          |
+  | `find/2`        | return the first element that matches the selector |
+  | `find!/2`       | return the only element that matches the selector  |
+
+  ## Parsing functions
+
+  | `parse/1`     | parses an HTML fragment into a [Floki HTML tree] |
+  | `parse_doc/1` | parses an HTML doc into a [Floki HTML tree]      |
+
+  ## Extraction functions
+
+  | `attr/2`        | returns the attribute value as a string              |
+  | `form_fields/1` | returns the names and values of form fields as a map |
+  | `meta_tags/1`   | returns the names and values of metadata fields      |
+  | `text/1`        | returns the text contents as a single string         |
+
+  ## Utility functions
+
+  | `inspect_html/2` | prints prettified HTML with a label |
+  | `normalize/1`    | parses and re-stringifies HTML      |
+  | `pretty/1`       | prettifies HTML                     |
+
+
+  ## Alias
 
   If you use HtmlQuery a lot, you may want to alias it to the recommended shortcut "Hq":
   ```elixir
@@ -57,16 +83,22 @@ defmodule HtmlQuery do
 
   @module_name __MODULE__ |> Module.split() |> Enum.join(".")
 
+  @typedoc "A string or atom representing an attribute name. If an atom, underscores are converted to dashes."
   @type attr :: binary() | atom()
-  @type html :: binary() | Floki.html_tree() | Floki.html_node()
-  @type selector :: binary() | keyword() | atom()
+
+  @typedoc """
+  A string, a struct that implements the `String.Chars` protocol,
+  a [Floki HTML tree], or a [Floki HTML node].
+
+  [Floki HTML tree]: https://hexdocs.pm/floki/Floki.html#t:html_tree/0
+  [Floki HTML node]: https://hexdocs.pm/floki/Floki.html#t:html_node/0
+  """
+  @type html :: binary() | String.Chars.t() | Floki.html_tree() | Floki.html_node()
 
   # # #
 
   @doc """
-  Finds all elements in `html` that match `selector`. Returns a
-  [Floki HTML tree](https://hexdocs.pm/floki/Floki.html#t:html_tree/0), which is a list of
-  [Floki HTML nodes](https://hexdocs.pm/floki/Floki.html#t:html_node/0).
+  Finds all elements in `html` that match `selector`, returning a Floki HTML tree.
 
   ```elixir
   iex> html = ~s|<select> <option value="a" selected>apples</option> <option value="b">bananas</option> </select>|
@@ -77,12 +109,11 @@ defmodule HtmlQuery do
   ]
   ```
   """
-  @spec all(html(), selector()) :: Floki.html_tree()
+  @spec all(html(), HtmlQuery.Css.selector()) :: Floki.html_tree()
   def all(html, selector), do: html |> parse() |> Floki.find(HtmlQuery.Css.selector(selector))
 
   @doc """
-  Finds the first element in `html` that matches `selector`. Returns a
-  [Floki HTML node](https://hexdocs.pm/floki/Floki.html#t:html_node/0).
+  Finds the first element in `html` that matches `selector`, returning a Floki HTML node.
 
   ```elixir
   iex> html = ~s|<select> <option value="a" selected>apples</option> <option value="b">bananas</option> </select>|
@@ -90,19 +121,20 @@ defmodule HtmlQuery do
   {"option", [{"value", "a"}, {"selected", "selected"}], ["apples"]}
   ```
   """
-  @spec find(html(), selector()) :: Floki.html_node()
+  @spec find(html(), HtmlQuery.Css.selector()) :: Floki.html_node()
   def find(html, selector), do: all(html, selector) |> List.first()
 
   @doc """
   Like `find/2` but raises unless exactly one element is found.
   """
-  @spec find!(html(), selector()) :: Floki.html_node()
+  @spec find!(html(), HtmlQuery.Css.selector()) :: Floki.html_node()
   def find!(html, selector), do: all(html, selector) |> first!()
 
   # # #
 
   @doc """
-  Returns the value of `attr` from the outermost element of `html`
+  Returns the value of `attr` from the outermost element of `html`.
+  If `attr` is an atom, any underscores are converted to dashes.
 
   ```elixir
   iex> html = ~s|<div> <a href="/logout" test-role="logout-link">logout</a> </div>|
@@ -117,12 +149,12 @@ defmodule HtmlQuery do
     html
     |> parse()
     |> first!("Consider using Enum.map(html, &#{@module_name}.attr(&1, #{inspect(attr)}))")
-    |> Floki.attribute(to_string(attr))
+    |> Floki.attribute(attr |> to_string() |> Moar.String.dasherize())
     |> List.first()
   end
 
   @doc """
-  Returns the text value of `html`
+  Returns the text value of `html`.
 
   ```elixir
   iex> html = ~s|<select> <option value="a" selected>apples</option> <option value="b">bananas</option> </select>|
@@ -158,7 +190,7 @@ defmodule HtmlQuery do
   %{profile: %{name: "fido", age: "10"}}
   ```
   """
-  @spec form_fields(html()) :: map()
+  @spec form_fields(html()) :: %{atom() => binary() | map()}
   def form_fields(html) do
     %{}
     |> form_field_values(html, "input[value]", &attr(&1, "value"))
@@ -182,7 +214,7 @@ defmodule HtmlQuery do
   end
 
   @doc """
-  Extracts all the meta tags from `html`.
+  Extracts all the meta tags from `html`, returning a list of maps.
 
   ```elixir
   iex> html = ~s|<head> <meta charset="utf-8"/> <meta http-equiv="X-UA-Compatible" content="IE=edge"/> </head>|
@@ -190,7 +222,7 @@ defmodule HtmlQuery do
   [%{"charset" => "utf-8"}, %{"content" => "IE=edge", "http-equiv" => "X-UA-Compatible"}]
   ```
   """
-  @spec meta_tags(html()) :: [map()]
+  @spec meta_tags(html()) :: [%{binary() => binary()}]
   def meta_tags(html), do: html |> parse() |> extract_meta_tags()
 
   @doc """
@@ -210,10 +242,7 @@ defmodule HtmlQuery do
   def normalize(html), do: html |> parse() |> Floki.raw_html()
 
   @doc """
-  Parses an HTML fragment using `Floki.parse_fragment!/1`, returning a
-  [Floki HTML tree](https://hexdocs.pm/floki/Floki.html#t:html_tree/0).
-
-  `html` can be an HTML string, a Floki HTML tree, a Floki HTML node, or any struct that implements `String.Chars`.
+  Parses an HTML fragment using `Floki.parse_fragment!/1`, returning a Floki HTML tree.
   """
   @spec parse(html()) :: Floki.html_tree()
   def parse(html) when is_binary(html), do: html |> Floki.parse_fragment!()
@@ -222,14 +251,15 @@ defmodule HtmlQuery do
   def parse(%_{} = html), do: html |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse()
 
   @doc """
-  Parses an HTML document using `Floki.parse_document!/1`, returning a
-  [Floki HTML tree](https://hexdocs.pm/floki/Floki.html#t:html_tree/0).
+  Parses an HTML document using `Floki.parse_document!/1`, returning a Floki HTML tree.
   """
-  @spec parse_doc(binary()) :: Floki.html_tree()
-  def parse_doc(html), do: html |> Floki.parse_document!()
+  @spec parse_doc(html()) :: Floki.html_tree()
+  def parse_doc(html) when is_binary(html), do: html |> Floki.parse_document!()
+  def parse_doc(html) when is_list(html), do: html
+  def parse_doc(%_{} = html), do: html |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse_doc()
 
   @doc """
-  Pretty-ifies `html` using `Floki.raw_html/2` and its `pretty: true` option.
+  Returns `html` as a prettified string, using `Floki.raw_html/2` and its `pretty: true` option.
   """
   @spec pretty(html()) :: binary()
   def pretty(html), do: html |> parse() |> Floki.raw_html(encode: false, pretty: true)
@@ -256,7 +286,7 @@ defmodule HtmlQuery do
     """
   end
 
-  @spec form_field_values(map(), html(), selector(), (html() -> binary())) :: map()
+  @spec form_field_values(map(), html(), HtmlQuery.Css.selector(), (html() -> binary())) :: map()
   defp form_field_values(acc, html, selector, value_fn) do
     html
     |> all(selector)

@@ -5,10 +5,11 @@ defmodule HtmlQuery.Css do
   Constructs CSS selectors via Elixir data structures. See `selector/1` for details.
   """
 
-  @type selector() :: binary() | atom() | list()
+  @typedoc "See docs for `selector/1` for more details."
+  @type selector() :: binary() | atom() | keyword() | list()
 
   @doc ~S"""
-  Accepts a string, atom, or list and returns a CSS string.
+  Accepts a string, atom, keyword list, or list, and returns a CSS string.
 
   ## String syntax
 
@@ -17,6 +18,15 @@ defmodule HtmlQuery.Css do
   ```elixir
   iex> HtmlQuery.Css.selector(".profile[test-role='new-members']")
   ".profile[test-role='new-members']"
+  ```
+
+  ## Atom syntax
+
+  When given an atom, converts the atom to a string, without converting underscores to dashes.
+
+  ```elixir
+  iex> HtmlQuery.Css.selector(:p)
+  "p"
   ```
 
   ## Keyword list syntax
@@ -60,12 +70,12 @@ defmodule HtmlQuery.Css do
   "p[class='profile'][test-role='new-members']"
   ```
 
-  ## Regular (non-keyword) list syntax
+  ## List syntax
 
   _The list syntax is intentionally limited; complex selectors are more
   easily written as strings._
 
-  When the value is a regular (non-keyword) list, atoms are converted to element selectors and
+  When the value is a list (vs a keyword list), atoms are converted to element selectors and
   keyword lists are converted as described above.
 
   ```elixir
