@@ -84,7 +84,7 @@ defmodule HtmlQuery do
   @module_name __MODULE__ |> Module.split() |> Enum.join(".")
 
   @typedoc "A string or atom representing an attribute name. If an atom, underscores are converted to dashes."
-  @type attr :: binary() | atom()
+  @type attr() :: binary() | atom()
 
   @typedoc """
   A string, a struct that implements the `String.Chars` protocol,
@@ -93,7 +93,7 @@ defmodule HtmlQuery do
   [Floki HTML tree]: https://hexdocs.pm/floki/Floki.html#t:html_tree/0
   [Floki HTML node]: https://hexdocs.pm/floki/Floki.html#t:html_node/0
   """
-  @type html :: binary() | String.Chars.t() | Floki.html_tree() | Floki.html_node()
+  @type html() :: binary() | String.Chars.t() | Floki.html_tree() | Floki.html_node()
 
   # # #
 
