@@ -298,10 +298,13 @@ defmodule HtmlQuery do
   defp form_field_value(acc, input, value_fn) do
     value = value_fn.(input)
 
-    case input |> attr("name") |> unwrap_input_name() do
-      {key1, key2} -> Moar.Map.deep_merge(acc, %{key1 => %{key2 => value}})
-      key -> Moar.Map.deep_merge(acc, %{key => value})
-    end
+    map =
+      case input |> attr("name") |> unwrap_input_name() do
+        {key1, key2} -> %{key1 => %{key2 => value}} |> Moar.Map.deep_atomize_keys()
+        key -> %{key => value} |> Moar.Map.atomize_keys()
+      end
+
+    Moar.Map.deep_merge(acc, map)
   end
 
   @spec unwrap_input_name(binary()) :: binary() | {binary(), binary()}

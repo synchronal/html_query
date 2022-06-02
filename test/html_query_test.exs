@@ -177,6 +177,7 @@ defmodule HtmlQueryTest do
         <input type="text" name="person[name]" value="alice">
         <input type="email" name="auth[email]" value="alice@example.com">
         <input type="password" name="auth[password]" value="password123">
+        <textarea name="auth[about]">Alice is 100</textarea>
       </form>
       """
       |> Hq.find("form")
@@ -184,8 +185,34 @@ defmodule HtmlQueryTest do
       |> assert_eq(%{
         _csrf: "_123xyz",
         person: %{name: "alice"},
-        auth: %{email: "alice@example.com", password: "password123"}
+        auth: %{email: "alice@example.com", password: "password123", about: "Alice is 100"}
       })
+    end
+
+    test "converts dashes in fields names to underscores" do
+      """
+      <form>
+        <input type="text" name="full-name" value="Alice Ant">
+        <input type="text" name="backup-auth[backup-password]" value="alice123">
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{full_name: "Alice Ant", backup_auth: %{backup_password: "alice123"}})
+    end
+
+    test "uses the last value when there are duplicate field names" do
+      """
+      <form>
+        <input type="text" name="name" value="alice">
+        <input type="text" name="name" value="billy">
+        <input type="text" name="auth[password]" value="alice123">
+        <input type="text" name="auth[password]" value="billy123">
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{name: "billy", auth: %{password: "billy123"}})
     end
   end
 
@@ -221,6 +248,30 @@ defmodule HtmlQueryTest do
       ]
 
       html |> Hq.meta_tags() |> assert_eq(expected, ignore_order: true)
+    end
+  end
+
+  describe "normalize" do
+    test "normalizes an html string" do
+      """
+      <div>
+        <span    id   = "foo"> value</span>
+        </div>
+      """
+      |> Hq.normalize()
+      |> assert_eq(~s|<div><span id="foo"> value</span></div>|)
+    end
+
+    test "accepts a Floki HTML tree (for flexibility)" do
+      [{"div", [], [{"span", [{"id", "foo"}], [" value"]}]}]
+      |> Hq.normalize()
+      |> assert_eq(~s|<div><span id="foo"> value</span></div>|)
+    end
+
+    test "accepts a Floki HTML node (for flexibility)" do
+      {"div", [], [{"span", [{"id", "foo"}], [" value"]}]}
+      |> Hq.normalize()
+      |> assert_eq(~s|<div><span id="foo"> value</span></div>|)
     end
   end
 
@@ -290,6 +341,30 @@ defmodule HtmlQueryTest do
         </p>
         <span>
           span!
+        </span>
+      </div>
+      """)
+    end
+
+    test "accepts a Floki HTML tree (for flexibility)" do
+      [{"div", [], [{"span", [{"id", "foo"}], [" value"]}]}]
+      |> Hq.pretty()
+      |> assert_eq(~s"""
+      <div>
+        <span id="foo">
+          value
+        </span>
+      </div>
+      """)
+    end
+
+    test "accepts a Floki HTML node (for flexibility)" do
+      {"div", [], [{"span", [{"id", "foo"}], [" value"]}]}
+      |> Hq.pretty()
+      |> assert_eq(~s"""
+      <div>
+        <span id="foo">
+          value
         </span>
       </div>
       """)
