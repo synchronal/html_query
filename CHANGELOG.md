@@ -2,6 +2,10 @@
 
 ## Unreleased changes
 
+## 0.2.1
+
+- Fix typespec for `HtmlQuery.find/2`
+
 ## 0.2.0
 
 - `HtmlQuery.form_fields/1` converts dashes in field names to underscores.
