@@ -121,7 +121,7 @@ defmodule HtmlQuery do
   {"option", [{"value", "a"}, {"selected", "selected"}], ["apples"]}
   ```
   """
-  @spec find(html(), HtmlQuery.Css.selector()) :: Floki.html_node()
+  @spec find(html(), HtmlQuery.Css.selector()) :: Floki.html_node() | nil
   def find(html, selector), do: all(html, selector) |> List.first()
 
   @doc """
