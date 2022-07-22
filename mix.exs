@@ -36,7 +36,7 @@ defmodule HtmlQuery.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:floki, "~> 0.32.1"},
+      {:floki, "~> 0.32"},
       {:jason, "~> 1.3", optional: true},
       {:mix_audit, "~> 1.0", only: :dev, runtime: false},
       {:mix_test_interactive, "~> 1.2", only: :dev, runtime: false},

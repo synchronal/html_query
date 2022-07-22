@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Relax Floki version restriction.
+
 ## 0.2.1
 
 - Fix typespec for `HtmlQuery.find/2`
