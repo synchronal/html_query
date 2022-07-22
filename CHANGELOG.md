@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.2.2
+
 - Relax Floki version restriction.
 
 ## 0.2.1
