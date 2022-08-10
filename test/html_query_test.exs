@@ -83,7 +83,7 @@ defmodule HtmlQueryTest do
     end
 
     test "raises if the first argument is a list or HTML tree" do
-      assert_raise RuntimeError,
+      assert_raise HtmlQuery.QueryError,
                    """
                    Expected a single HTML node but got:
 
@@ -131,13 +131,17 @@ defmodule HtmlQueryTest do
     end
 
     test "fails if no element is found" do
-      assert_raise RuntimeError,
-                   "Expected a single HTML node but found none",
+      assert_raise HtmlQuery.QueryError,
+                   """
+                   Expected a single HTML node but found none
+
+                   Selector: glorp
+                   """,
                    fn -> @html |> Hq.find!("glorp") end
     end
 
     test "fails if more than 1 element is found" do
-      assert_raise RuntimeError,
+      assert_raise HtmlQuery.QueryError,
                    """
                    Expected a single HTML node but got:
 
@@ -148,7 +152,7 @@ defmodule HtmlQueryTest do
                      P2
                    </p>
 
-
+                   Selector: p
                    """,
                    fn -> @html |> Hq.find!("p") end
     end
@@ -389,7 +393,7 @@ defmodule HtmlQueryTest do
     end
 
     test "raises if a list or HTML tree is passed in" do
-      assert_raise RuntimeError,
+      assert_raise HtmlQuery.QueryError,
                    """
                    Expected a single HTML node but got:
 

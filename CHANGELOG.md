@@ -2,6 +2,9 @@
 
 ## Unreleased changes
 
+- Raise `HtmlQuery.QueryError` instead of `RuntimeError`.
+  - includes selector.
+
 ## 0.2.2
 
 - Relax Floki version restriction.

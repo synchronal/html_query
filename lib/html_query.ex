@@ -81,6 +81,8 @@ defmodule HtmlQuery do
   ```
   """
 
+  alias HtmlQuery.QueryError
+
   @module_name __MODULE__ |> Module.split() |> Enum.join(".")
 
   @typedoc "A string or atom representing an attribute name. If an atom, underscores are converted to dashes."
@@ -128,7 +130,7 @@ defmodule HtmlQuery do
   Like `find/2` but raises unless exactly one element is found.
   """
   @spec find!(html(), HtmlQuery.Css.selector()) :: Floki.html_node()
-  def find!(html, selector), do: all(html, selector) |> first!()
+  def find!(html, selector), do: all(html, selector) |> first!("Selector: #{HtmlQuery.Css.selector(selector)}")
 
   # # #
 
@@ -270,15 +272,19 @@ defmodule HtmlQuery do
   defp extract_meta_tags(html),
     do: all(html, "meta") |> Enum.map(fn {"meta", attrs, _} -> Map.new(attrs) end)
 
-  @spec first!(html(), binary() | nil) :: html()
-  defp first!(html, hint \\ nil)
+  @spec first!(html(), binary()) :: html()
+  defp first!([], hint),
+    do:
+      raise(QueryError, """
+      Expected a single HTML node but found none
 
-  defp first!([], _hint), do: raise("Expected a single HTML node but found none")
+      #{hint}
+      """)
 
   defp first!([node], _hint), do: node
 
   defp first!(html, hint) do
-    raise """
+    raise QueryError, """
     Expected a single HTML node but got:
 
     #{pretty(html)}
