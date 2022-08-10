@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.2.3
+
 - Raise `HtmlQuery.QueryError` instead of `RuntimeError`.
   - includes selector.
 
