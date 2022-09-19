@@ -144,7 +144,7 @@ defmodule HtmlQuery do
   "/logout"
   ```
   """
-  @spec attr(html(), attr()) :: binary()
+  @spec attr(html(), attr()) :: binary() | nil
   def attr(nil, _attr), do: nil
 
   def attr(html, attr) do
