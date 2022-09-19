@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.2.4
+
 - Fix typespec
 
 ## 0.2.3
