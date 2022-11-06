@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Add `HtmlQuery.table/1` which returns the contents of a table's cells as a list of lists.
+
 ## 0.2.4
 
 - Fix typespec

@@ -375,6 +375,32 @@ defmodule HtmlQueryTest do
     end
   end
 
+  describe "table" do
+    @html """
+    <table>
+      <thead>
+        <tr><th>Col 1</th><th>Col 2</th><th>Col 3</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1,1</td><td>1,2</td><td>1,3</td></tr>
+        <tr><td>2,1</td><td>2,2</td><td>2,3</td></tr>
+        <tr><td>3,1</td><td>3,2</td><td>3,3</td></tr>
+      </tbody>
+    </table>
+    """
+
+    test "extracts the cells from the table" do
+      @html
+      |> Hq.table()
+      |> assert_eq([
+        ["Col 1", "Col 2", "Col 3"],
+        ["1,1", "1,2", "1,3"],
+        ["2,1", "2,2", "2,3"],
+        ["3,1", "3,2", "3,3"]
+      ])
+    end
+  end
+
   describe "text" do
     @html """
     <div>

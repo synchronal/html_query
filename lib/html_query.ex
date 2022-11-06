@@ -30,6 +30,7 @@ defmodule HtmlQuery do
   | `attr/2`        | returns the attribute value as a string              |
   | `form_fields/1` | returns the names and values of form fields as a map |
   | `meta_tags/1`   | returns the names and values of metadata fields      |
+  | `table/1`       | returns the cells of a table as a list of lists      |
   | `text/1`        | returns the text contents as a single string         |
 
   ## Utility functions
@@ -265,6 +266,13 @@ defmodule HtmlQuery do
   """
   @spec pretty(html()) :: binary()
   def pretty(html), do: html |> parse() |> Floki.raw_html(encode: false, pretty: true)
+
+  @doc """
+  Returns the contents of the table as a list of lists.
+  """
+  @spec table(html()) :: [[]]
+  def table(html),
+    do: html |> parse() |> all("tr") |> Enum.map(fn row -> row |> all("td,th") |> Enum.map(&text/1) end)
 
   # # #
 
