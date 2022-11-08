@@ -269,6 +269,15 @@ defmodule HtmlQuery do
 
   @doc """
   Returns the contents of the table as a list of lists.
+
+  ```elixir
+  iex> html = "<table> <tr><th>A</th><th>B</th></tr> <tr><td>1</td><td>2</td></tr> </table>"
+  iex> HtmlQuery.table(html)
+  [
+    ["A", "B"],
+    ["1", "2"]
+  ]
+  ```
   """
   @spec table(html()) :: [[]]
   def table(html),
