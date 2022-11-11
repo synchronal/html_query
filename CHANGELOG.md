@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.4.0
+
 - `HtmlQuery.form_fields/1` response includes `select` fields.
 
 ## 0.3.0
