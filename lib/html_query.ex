@@ -198,6 +198,7 @@ defmodule HtmlQuery do
     %{}
     |> form_field_values(html, "input[value]", &attr(&1, "value"))
     |> form_field_values(html, :textarea, &text/1)
+    |> form_field_values(html, :select, &selected_option/1)
     |> Moar.Map.atomize_keys()
   end
 
@@ -328,6 +329,14 @@ defmodule HtmlQuery do
       end
 
     Moar.Map.deep_merge(acc, map)
+  end
+
+  @spec selected_option(html()) :: binary()
+  defp selected_option(select) do
+    case find(select, "option[selected]") do
+      nil -> ""
+      option -> text(option)
+    end
   end
 
   @spec unwrap_input_name(binary()) :: binary() | {binary(), binary()}

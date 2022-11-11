@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.form_fields/1` response includes `select` fields.
+
 ## 0.3.0
 
 - Add `HtmlQuery.table/1` which returns the contents of a table's cells as a list of lists.
