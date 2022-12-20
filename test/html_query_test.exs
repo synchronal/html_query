@@ -247,6 +247,24 @@ defmodule HtmlQueryTest do
       |> Hq.form_fields()
       |> assert_eq(%{yes_or_no: "yes", preferred_contact: "", auth: %{remember_me: "forget"}})
     end
+
+    test "uses the checked value for checkboxes" do
+      """
+      <form>
+        <input type="checkbox" name="shirt_size" value="s" />
+        <input type="checkbox" name="shirt_size" value="m" checked />
+        <input type="checkbox" name="shirt_size" value="l" />
+        <input type="checkbox" name="shirt_size" value="xl" checked />
+        <input type="checkbox" name="auth[remember_me]" value="yes" />
+        <input type="checkbox" name="auth[factors]" value="password" checked />
+        <input type="checkbox" name="auth[factors]" value="one-time password" />
+        <input type="checkbox" name="auth[factors]" value="passkey" checked />
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{shirt_size: ["m", "xl"], auth: %{remember_me: "", factors: ["password", "passkey"]}})
+    end
   end
 
   describe "meta_tags" do

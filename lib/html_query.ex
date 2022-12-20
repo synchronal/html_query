@@ -196,10 +196,11 @@ defmodule HtmlQuery do
   @spec form_fields(html()) :: %{atom() => binary() | map()}
   def form_fields(html) do
     %{}
-    |> form_field_values(html, "input[value]:not([type=radio])", &attr(&1, "value"))
-    |> form_field_values(html, "input[type=radio]", &checked_option/1)
-    |> form_field_values(html, :textarea, &text/1)
-    |> form_field_values(html, :select, &selected_option/1)
+    |> form_field_values(html, "input[value]:not([type=radio]):not([type=checkbox])", :term, &attr(&1, "value"))
+    |> form_field_values(html, "input[type=checkbox]", :list, &checked_value/1)
+    |> form_field_values(html, "input[type=radio]", :term, &checked_value/1)
+    |> form_field_values(html, :textarea, :term, &text/1)
+    |> form_field_values(html, :select, :term, &selected_option/1)
     |> Moar.Map.deep_atomize_keys()
   end
 
@@ -311,15 +312,15 @@ defmodule HtmlQuery do
     """
   end
 
-  @spec form_field_values(map(), html(), HtmlQuery.Css.selector(), (html() -> binary())) :: map()
-  defp form_field_values(acc, html, selector, value_fn) do
+  @spec form_field_values(map(), html(), HtmlQuery.Css.selector(), :term | :list, (html() -> binary())) :: map()
+  defp form_field_values(acc, html, selector, value_type, value_fn) do
     html
     |> all(selector)
-    |> Enum.reduce(acc, &form_field_value(&2, &1, value_fn))
+    |> Enum.reduce(acc, &form_field_value(&2, &1, value_type, value_fn))
   end
 
-  @spec form_field_value(map(), html(), (html() -> binary())) :: map()
-  defp form_field_value(acc, input, value_fn) do
+  @spec form_field_value(map(), html(), :term | :list, (html() -> binary())) :: map()
+  defp form_field_value(acc, input, value_type, value_fn) do
     value = value_fn.(input)
 
     map =
@@ -328,11 +329,17 @@ defmodule HtmlQuery do
         key -> %{key => value}
       end
 
-    Moar.Map.deep_merge(acc, map, fn old, new -> if Moar.Term.present?(new), do: new, else: old end)
+    update_fn =
+      case value_type do
+        :term -> fn _old, new -> new end
+        :list -> fn old, new -> (List.wrap(old) ++ [new]) |> Enum.reject(&Moar.Term.blank?/1) end
+      end
+
+    Moar.Map.deep_merge(acc, map, fn old, new -> if Moar.Term.present?(new), do: update_fn.(old, new), else: old end)
   end
 
-  @spec checked_option(html()) :: binary()
-  defp checked_option(checkbox_or_radio) do
+  @spec checked_value(html()) :: binary()
+  defp checked_value(checkbox_or_radio) do
     case attr(checkbox_or_radio, "checked") do
       nil -> ""
       _ -> attr(checkbox_or_radio, "value")
