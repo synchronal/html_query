@@ -322,20 +322,13 @@ defmodule HtmlQuery do
   defp form_field_value(acc, input, value_fn) do
     value = value_fn.(input)
 
-    case input |> attr("name") |> unwrap_input_name() do
-      {key1, key2} ->
-        %{key1 => %{key2 => value}} |> merge_non_blank_values([key1, key2], value, acc)
+    map =
+      case input |> attr("name") |> unwrap_input_name() do
+        {key1, key2} -> %{key1 => %{key2 => value}}
+        key -> %{key => value}
+      end
 
-      key ->
-        %{key => value} |> merge_non_blank_values([key], value, acc)
-    end
-  end
-
-  @spec merge_non_blank_values(map(), [binary()], binary() | nil, map()) :: map()
-  defp merge_non_blank_values(map, keys, value, acc) do
-    if Moar.Term.blank?(value) && get_in(acc, keys),
-      do: acc,
-      else: Moar.Map.deep_merge(acc, map)
+    Moar.Map.deep_merge(acc, map, fn old, new -> if Moar.Term.present?(new), do: new, else: old end)
   end
 
   @spec checked_option(html()) :: binary()
