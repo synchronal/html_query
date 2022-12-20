@@ -196,7 +196,8 @@ defmodule HtmlQuery do
   @spec form_fields(html()) :: %{atom() => binary() | map()}
   def form_fields(html) do
     %{}
-    |> form_field_values(html, "input[value]", &attr(&1, "value"))
+    |> form_field_values(html, "input[value]:not([type=radio])", &attr(&1, "value"))
+    |> form_field_values(html, "input[type=radio]", &checked_option/1)
     |> form_field_values(html, :textarea, &text/1)
     |> form_field_values(html, :select, &selected_option/1)
     |> Moar.Map.atomize_keys()
@@ -322,13 +323,28 @@ defmodule HtmlQuery do
   defp form_field_value(acc, input, value_fn) do
     value = value_fn.(input)
 
-    map =
-      case input |> attr("name") |> unwrap_input_name() do
-        {key1, key2} -> %{key1 => %{key2 => value}} |> Moar.Map.deep_atomize_keys()
-        key -> %{key => value} |> Moar.Map.atomize_keys()
-      end
+    case input |> attr("name") |> unwrap_input_name() do
+      {key1, key2} ->
+        %{key1 => %{key2 => value}} |> Moar.Map.deep_atomize_keys() |> merge_non_blank_values([key1, key2], value, acc)
 
-    Moar.Map.deep_merge(acc, map)
+      key ->
+        %{key => value} |> Moar.Map.atomize_keys() |> merge_non_blank_values([key], value, acc)
+    end
+  end
+
+  @spec merge_non_blank_values(map(), [binary()], binary() | nil, map()) :: map()
+  defp merge_non_blank_values(map, keys, value, acc) do
+    if Moar.Term.blank?(value) && get_in(acc, keys |> Enum.map(&Moar.Atom.from_string/1)),
+      do: acc,
+      else: Moar.Map.deep_merge(acc, map)
+  end
+
+  @spec checked_option(html()) :: binary()
+  defp checked_option(checkbox_or_radio) do
+    case attr(checkbox_or_radio, "checked") do
+      nil -> ""
+      _ -> attr(checkbox_or_radio, "value")
+    end
   end
 
   @spec selected_option(html()) :: binary()

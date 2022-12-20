@@ -231,6 +231,22 @@ defmodule HtmlQueryTest do
       |> Hq.form_fields()
       |> assert_eq(%{name: "billy", auth: %{password: "billy123"}})
     end
+
+    test "uses the checked value for radio inputs" do
+      """
+      <form>
+        <input type="radio" name="auth[remember_me]" value="remember" />
+        <input type="radio" name="auth[remember_me]" value="forget" checked />
+        <input type="radio" name="yes_or_no" value="yes" checked />
+        <input type="radio" name="yes_or_no" value="no" />
+        <input type="radio" name="preferred_contact" value="email" />
+        <input type="radio" name="preferred_contact" value="phone" />
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{yes_or_no: "yes", preferred_contact: "", auth: %{remember_me: "forget"}})
+    end
   end
 
   describe "meta_tags" do
