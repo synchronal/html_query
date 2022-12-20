@@ -200,7 +200,7 @@ defmodule HtmlQuery do
     |> form_field_values(html, "input[type=radio]", &checked_option/1)
     |> form_field_values(html, :textarea, &text/1)
     |> form_field_values(html, :select, &selected_option/1)
-    |> Moar.Map.atomize_keys()
+    |> Moar.Map.deep_atomize_keys()
   end
 
   @doc """
@@ -316,7 +316,6 @@ defmodule HtmlQuery do
     html
     |> all(selector)
     |> Enum.reduce(acc, &form_field_value(&2, &1, value_fn))
-    |> Moar.Map.deep_atomize_keys()
   end
 
   @spec form_field_value(map(), html(), (html() -> binary())) :: map()
@@ -325,16 +324,16 @@ defmodule HtmlQuery do
 
     case input |> attr("name") |> unwrap_input_name() do
       {key1, key2} ->
-        %{key1 => %{key2 => value}} |> Moar.Map.deep_atomize_keys() |> merge_non_blank_values([key1, key2], value, acc)
+        %{key1 => %{key2 => value}} |> merge_non_blank_values([key1, key2], value, acc)
 
       key ->
-        %{key => value} |> Moar.Map.atomize_keys() |> merge_non_blank_values([key], value, acc)
+        %{key => value} |> merge_non_blank_values([key], value, acc)
     end
   end
 
   @spec merge_non_blank_values(map(), [binary()], binary() | nil, map()) :: map()
   defp merge_non_blank_values(map, keys, value, acc) do
-    if Moar.Term.blank?(value) && get_in(acc, keys |> Enum.map(&Moar.Atom.from_string/1)),
+    if Moar.Term.blank?(value) && get_in(acc, keys),
       do: acc,
       else: Moar.Map.deep_merge(acc, map)
   end
