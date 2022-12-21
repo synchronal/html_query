@@ -192,6 +192,9 @@ defmodule HtmlQuery do
   iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
   %{profile: %{name: "fido", age: "10"}}
   ```
+
+  For radio buttons, the checked value is returned, or `nil` is returned if no value is checked. For checkboxes,
+  all the checked values are returned as a list, or `[]` is returend if no values are checked.
   """
   @spec form_fields(html()) :: %{atom() => binary() | map()}
   def form_fields(html) do
@@ -322,6 +325,7 @@ defmodule HtmlQuery do
   @spec form_field_value(map(), html(), :term | :list, (html() -> binary())) :: map()
   defp form_field_value(acc, input, value_type, value_fn) do
     value = value_fn.(input)
+    value = if value_type == :list, do: List.wrap(value), else: value
 
     map =
       case input |> attr("name") |> unwrap_input_name() do
@@ -332,7 +336,7 @@ defmodule HtmlQuery do
     update_fn =
       case value_type do
         :term -> fn _old, new -> new end
-        :list -> fn old, new -> (List.wrap(old) ++ [new]) |> Enum.reject(&Moar.Term.blank?/1) end
+        :list -> fn old, new -> (old ++ new) |> Enum.reject(&Moar.Term.blank?/1) end
       end
 
     Moar.Map.deep_merge(acc, map, fn old, new -> if Moar.Term.present?(new), do: update_fn.(old, new), else: old end)
@@ -341,7 +345,7 @@ defmodule HtmlQuery do
   @spec checked_value(html()) :: binary()
   defp checked_value(checkbox_or_radio) do
     case attr(checkbox_or_radio, "checked") do
-      nil -> ""
+      nil -> nil
       _ -> attr(checkbox_or_radio, "value")
     end
   end

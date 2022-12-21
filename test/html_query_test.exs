@@ -235,35 +235,34 @@ defmodule HtmlQueryTest do
     test "uses the checked value for radio inputs" do
       """
       <form>
-        <input type="radio" name="auth[remember_me]" value="remember" />
-        <input type="radio" name="auth[remember_me]" value="forget" checked />
-        <input type="radio" name="yes_or_no" value="yes" checked />
-        <input type="radio" name="yes_or_no" value="no" />
-        <input type="radio" name="preferred_contact" value="email" />
-        <input type="radio" name="preferred_contact" value="phone" />
+        <input type="radio" name="nested[one_item_checked]" value="a" />
+        <input type="radio" name="nested[one_item_checked]" value="b" checked />
+        <input type="radio" name="one_item_checked" value="x" checked />
+        <input type="radio" name="one_item_checked" value="y" />
+        <input type="radio" name="not_checked" value="1" />
+        <input type="radio" name="not_checked" value="2" />
       </form>
       """
       |> Hq.find("form")
       |> Hq.form_fields()
-      |> assert_eq(%{yes_or_no: "yes", preferred_contact: "", auth: %{remember_me: "forget"}})
+      |> assert_eq(%{one_item_checked: "x", not_checked: nil, nested: %{one_item_checked: "b"}})
     end
 
     test "uses the checked value for checkboxes" do
       """
       <form>
-        <input type="checkbox" name="shirt_size" value="s" />
-        <input type="checkbox" name="shirt_size" value="m" checked />
-        <input type="checkbox" name="shirt_size" value="l" />
-        <input type="checkbox" name="shirt_size" value="xl" checked />
-        <input type="checkbox" name="auth[remember_me]" value="yes" />
-        <input type="checkbox" name="auth[factors]" value="password" checked />
-        <input type="checkbox" name="auth[factors]" value="one-time password" />
-        <input type="checkbox" name="auth[factors]" value="passkey" checked />
+        <input type="checkbox" name="two_items_checked" value="a" />
+        <input type="checkbox" name="two_items_checked" value="b" checked />
+        <input type="checkbox" name="two_items_checked" value="c" />
+        <input type="checkbox" name="two_items_checked" value="d" checked />
+        <input type="checkbox" name="nested[not_checked]" value="yes" />
+        <input type="checkbox" name="nested[one_item_checked]" value="x" checked />
+        <input type="checkbox" name="nested[one_item_checked]" value="y" />
       </form>
       """
       |> Hq.find("form")
       |> Hq.form_fields()
-      |> assert_eq(%{shirt_size: ["m", "xl"], auth: %{remember_me: "", factors: ["password", "passkey"]}})
+      |> assert_eq(%{two_items_checked: ["b", "d"], nested: %{not_checked: [], one_item_checked: ["x"]}})
     end
   end
 

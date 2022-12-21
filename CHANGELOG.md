@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.form_fields/1` now handles checkboxes and radio buttons.
+ 
 ## 0.4.0
 
 - `HtmlQuery.form_fields/1` response includes `select` fields.
