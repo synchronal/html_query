@@ -186,6 +186,22 @@ defmodule HtmlQueryTest do
       |> assert_eq(%{favorite_color: ""})
     end
 
+    test "excludes inputs with no name" do
+      """
+      <form test-role="test-form">
+        <input type="text" value="alice">
+        <input type="number" value="100">
+        <input type="email" value="">
+        <textarea>Alice is 100</textarea>
+        <select><option>red</option><option selected>blue</option><option>green</option></select>
+        <input type="submit">
+      </form>
+      """
+      |> Hq.find(test_role: "test-form")
+      |> Hq.form_fields()
+      |> assert_eq(%{})
+    end
+
     test "returns a nested map when names are in x[y] format" do
       """
       <form>

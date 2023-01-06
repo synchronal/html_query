@@ -199,11 +199,11 @@ defmodule HtmlQuery do
   @spec form_fields(html()) :: %{atom() => binary() | map()}
   def form_fields(html) do
     %{}
-    |> form_field_values(html, "input[value]:not([type=radio]):not([type=checkbox])", :term, &attr(&1, "value"))
-    |> form_field_values(html, "input[type=checkbox]", :list, &checked_value/1)
-    |> form_field_values(html, "input[type=radio]", :term, &checked_value/1)
-    |> form_field_values(html, :textarea, :term, &text/1)
-    |> form_field_values(html, :select, :term, &selected_option/1)
+    |> form_field_values(html, "input[value][name]:not([type=radio]):not([type=checkbox])", :term, &attr(&1, "value"))
+    |> form_field_values(html, "input[name][type=checkbox]", :list, &checked_value/1)
+    |> form_field_values(html, "input[name][type=radio]", :term, &checked_value/1)
+    |> form_field_values(html, "textarea[name]", :term, &text/1)
+    |> form_field_values(html, "select[name]", :term, &selected_option/1)
     |> Moar.Map.deep_atomize_keys()
   end
 
