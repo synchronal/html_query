@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased changes
+## 0.5.2
+
+- Dependency on `Moar` allows for any version greater than or equal to 1.24.1.
+
+## 0.5.1
 
 - `HtmlQuery.form_fields/1` only returns inputs that have a `name` attribute.
 
