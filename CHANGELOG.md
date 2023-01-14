@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Fix typespec on `HtmlQuery.table/2`
+
 ## 0.6.0
 
 - Add `columns` option to `HtmlQuery.table`, which returns only the given columns.

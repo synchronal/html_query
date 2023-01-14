@@ -294,7 +294,7 @@ defmodule HtmlQuery do
   ]
   ```
   """
-  @spec table(html(), [{:columns, [binary()]}]) :: [[]]
+  @spec table(html(), keyword()) :: [[]]
   def table(html, opts \\ []) do
     columns = Keyword.get(opts, :columns, :all)
 
