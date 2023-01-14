@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.6.0
+
 - Add `columns` option to `HtmlQuery.table`, which returns only the given columns.
 
 ## 0.5.2
