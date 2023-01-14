@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased changes
+
+- Add `columns` option to `HtmlQuery.table`, which returns only the given columns.
+
 ## 0.5.2
 
 - Dependency on `Moar` allows for any version greater than or equal to 1.24.1.

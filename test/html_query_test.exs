@@ -461,6 +461,17 @@ defmodule HtmlQueryTest do
         ["3,1", "3,2", "3,3"]
       ])
     end
+
+    test "can filter certain columns" do
+      @html
+      |> Hq.table(columns: [0, 2])
+      |> assert_eq([
+        ["Col 1", "Col 3"],
+        ["1,1", "1,3"],
+        ["2,1", "2,3"],
+        ["3,1", "3,3"]
+      ])
+    end
   end
 
   describe "text" do

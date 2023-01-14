@@ -30,7 +30,7 @@ defmodule HtmlQuery do
   | `attr/2`        | returns the attribute value as a string              |
   | `form_fields/1` | returns the names and values of form fields as a map |
   | `meta_tags/1`   | returns the names and values of metadata fields      |
-  | `table/1`       | returns the cells of a table as a list of lists      |
+  | `table/2`       | returns the cells of a table as a list of lists      |
   | `text/1`        | returns the text contents as a single string         |
 
   ## Utility functions
@@ -276,18 +276,33 @@ defmodule HtmlQuery do
   @doc """
   Returns the contents of the table as a list of lists.
 
+  Options:
+  * `columns` - a list of the indices of the columns to return, or `:all` to return all columns (which is the same
+    as not specifying this option all all).
+
   ```elixir
-  iex> html = "<table> <tr><th>A</th><th>B</th></tr> <tr><td>1</td><td>2</td></tr> </table>"
+  iex> html = "<table> <tr><th>A</th><th>B</th><th>C</th></tr> <tr><td>1</td><td>2</td><td>3</td></tr> </table>"
   iex> HtmlQuery.table(html)
   [
-    ["A", "B"],
-    ["1", "2"]
+    ["A", "B", "C"],
+    ["1", "2", "3"]
+  ]
+  iex> HtmlQuery.table(html, columns: [0, 2])
+  [
+    ["A", "C"],
+    ["1", "3"]
   ]
   ```
   """
-  @spec table(html()) :: [[]]
-  def table(html),
-    do: html |> parse() |> all("tr") |> Enum.map(fn row -> row |> all("td,th") |> Enum.map(&text/1) end)
+  @spec table(html(), [{:columns, [binary()]}]) :: [[]]
+  def table(html, opts \\ []) do
+    columns = Keyword.get(opts, :columns, :all)
+
+    html
+    |> parse()
+    |> all("tr")
+    |> Enum.map(fn row -> row |> all("td,th") |> Moar.Enum.take_at(columns) |> Enum.map(&text/1) end)
+  end
 
   # # #
 
