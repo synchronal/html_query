@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.6.1
+
 - Fix typespec on `HtmlQuery.table/2`
 
 ## 0.6.0

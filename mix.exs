@@ -2,7 +2,7 @@ defmodule HtmlQuery.MixProject do
   use Mix.Project
 
   @scm_url "https://github.com/synchronal/html_query"
-  @version "0.6.0"
+  @version "0.6.1"
 
   def application do
     [
