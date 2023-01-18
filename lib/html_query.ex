@@ -177,7 +177,8 @@ defmodule HtmlQuery do
   # # #
 
   @doc """
-  Returns a map containing the form fields of form `selector` in `html`.
+  Returns a map containing the form fields of form `selector` in `html`. Because it returns a map, any information
+  about the order of form fields is lost.
 
   ```elixir
   iex> html = ~s|<form> <input type="text" name="color" value="green"> <textarea name="desc">A tree</textarea> </form>|
