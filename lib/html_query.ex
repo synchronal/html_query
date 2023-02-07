@@ -377,6 +377,7 @@ defmodule HtmlQuery do
   @spec unwrap_input_name(binary()) :: binary() | {binary(), binary()}
   defp unwrap_input_name(input_name) do
     case Regex.run(~r|(.*)\[(.*)\]|, input_name) do
+      [_, child, ""] -> unwrap_input_name(child)
       [_, parent, child] -> {parent, child}
       _ -> input_name
     end

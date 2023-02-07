@@ -280,6 +280,18 @@ defmodule HtmlQueryTest do
       |> Hq.form_fields()
       |> assert_eq(%{two_items_checked: ["b", "d"], nested: %{not_checked: [], one_item_checked: ["x"]}})
     end
+
+    test "handles arrays of checkboxes" do
+      """
+      <form>
+        <input type="checkbox" name="nested[value][]" value="x" checked />
+        <input type="checkbox" name="nested[value][]" value="y" />
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{nested: %{value: ["x"]}})
+    end
   end
 
   describe "meta_tags" do

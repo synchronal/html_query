@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.form_fields/1` handles arrays of checkboxes.
+
 ## 0.6.1
 
 - Fix typespec on `HtmlQuery.table/2`
