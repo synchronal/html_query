@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.7.0
+
 - `HtmlQuery.table/2` can accept a list of column names to filter by.
 
 ## 0.6.2
