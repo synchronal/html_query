@@ -278,7 +278,8 @@ defmodule HtmlQuery do
   Returns the contents of the table as a list of lists.
 
   Options:
-  * `columns` - a list of the indices of the columns to return, or `:all` to return all columns (which is the same
+  * `columns` - a list of the indices of the columns to return; a list of column headers (as strings) to return,
+    assuming that the first row of the table is the columns names; or `:all` to return all columns (which is the same
     as not specifying this option all all).
 
   ```elixir
@@ -293,16 +294,31 @@ defmodule HtmlQuery do
     ["A", "C"],
     ["1", "3"]
   ]
+  iex> HtmlQuery.table(html, columns: [2, 0])
+  [
+    ["C", "A"],
+    ["3", "1"]
+  ]
+  iex> HtmlQuery.table(html, columns: ["C", "A"])
+  [
+    ["C", "A"],
+    ["3", "1"]
+  ]
   ```
   """
   @spec table(html(), keyword()) :: [[]]
   def table(html, opts \\ []) do
-    columns = Keyword.get(opts, :columns, :all)
+    rows = [first_row | _rest] = html |> parse() |> all("tr")
 
-    html
-    |> parse()
-    |> all("tr")
-    |> Enum.map(fn row -> row |> all("td,th") |> Moar.Enum.take_at(columns) |> Enum.map(&text/1) end)
+    columns =
+      case Keyword.get(opts, :columns) do
+        nil -> :all
+        :all -> :all
+        [first | _] = indices when is_integer(first) -> indices
+        [first | _] = names when is_binary(first) -> first_row |> table_row_values() |> Moar.Enum.find_indices(names)
+      end
+
+    Enum.map(rows, &table_row_values(&1, columns))
   end
 
   # # #
@@ -382,4 +398,8 @@ defmodule HtmlQuery do
       _ -> input_name
     end
   end
+
+  @spec table_row_values(html(), :all | [integer()]) :: [binary()]
+  defp table_row_values(row, columns \\ :all),
+    do: row |> all("td,th") |> Moar.Enum.take_at(columns) |> Enum.map(&text/1)
 end

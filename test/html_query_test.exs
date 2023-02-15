@@ -463,7 +463,7 @@ defmodule HtmlQueryTest do
     </table>
     """
 
-    test "extracts the cells from the table" do
+    test "extracts the cells from the table, returning all columns by default" do
       @html
       |> Hq.table()
       |> assert_eq([
@@ -474,7 +474,18 @@ defmodule HtmlQueryTest do
       ])
     end
 
-    test "can filter certain columns" do
+    test "`:all` columns can be requested explicitly" do
+      @html
+      |> Hq.table(columns: :all)
+      |> assert_eq([
+        ["Col 1", "Col 2", "Col 3"],
+        ["1,1", "1,2", "1,3"],
+        ["2,1", "2,2", "2,3"],
+        ["3,1", "3,2", "3,3"]
+      ])
+    end
+
+    test "can filter certain columns by index" do
       @html
       |> Hq.table(columns: [0, 2])
       |> assert_eq([
@@ -482,6 +493,17 @@ defmodule HtmlQueryTest do
         ["1,1", "1,3"],
         ["2,1", "2,3"],
         ["3,1", "3,3"]
+      ])
+    end
+
+    test "can filter certain columns by column title" do
+      @html
+      |> Hq.table(columns: ["Col 3", "Col 1"])
+      |> assert_eq([
+        ["Col 3", "Col 1"],
+        ["1,3", "1,1"],
+        ["2,3", "2,1"],
+        ["3,3", "3,1"]
       ])
     end
   end

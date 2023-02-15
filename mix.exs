@@ -40,7 +40,7 @@ defmodule HtmlQuery.MixProject do
       {:jason, "~> 1.3", optional: true},
       {:mix_audit, "~> 2.0", only: :dev, runtime: false},
       {:mix_test_interactive, "~> 1.2", only: :dev, runtime: false},
-      {:moar, "~> 1.26"}
+      {:moar, "~> 1.29"}
     ]
   end
 

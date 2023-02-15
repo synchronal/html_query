@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.table/2` can accept a list of column names to filter by.
+
 ## 0.6.2
 
 - `HtmlQuery.form_fields/1` handles arrays of checkboxes.
