@@ -2,6 +2,9 @@
 
 ## Unreleased changes
 
+- Update `Moar` to fix bug where `HtmlQuery.form_fields/1` would return `%{}` instead of `[]` when no checkboxes
+  were checked.
+
 ## 0.7.0
 
 - `HtmlQuery.table/2` can accept a list of column names to filter by.
