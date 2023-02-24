@@ -292,6 +292,19 @@ defmodule HtmlQueryTest do
       |> Hq.form_fields()
       |> assert_eq(%{nested: %{value: ["x"]}})
     end
+
+    test "returns `[]` when no checkboxes are checked" do
+      """
+      <form>
+        <input type="checkbox" name="color" value="blue" />
+        <input type="checkbox" name="color" value="green" />
+        <input type="checkbox" name="color" value="red" />
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{color: []})
+    end
   end
 
   describe "meta_tags" do
