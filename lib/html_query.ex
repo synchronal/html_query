@@ -186,6 +186,14 @@ defmodule HtmlQuery do
   %{color: "green", desc: "A tree"}
   ```
 
+  Field names are converted to snake case atoms:
+
+  ```elixir
+  iex> html = ~s|<form> <input type="text" name="favorite-color" value="green"> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{favorite_color: "green"}
+  ```
+
   If form field names are in `foo[bar]` format, then `foo` becomes a key to a nested map containing `bar`:
 
   ```elixir
@@ -194,8 +202,45 @@ defmodule HtmlQuery do
   %{profile: %{name: "fido", age: "10"}}
   ```
 
-  For radio buttons, the checked value is returned, or `nil` is returned if no value is checked. For checkboxes,
-  all the checked values are returned as a list, or `[]` is returend if no values are checked.
+  If a text field has no value attribute, it will not be returned at all:
+
+  ```elixir
+  iex> html = ~s|<form> <input type="text" name="no-value"> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{}
+
+  iex> html = ~s|<form> <input type="text" name="empty-value" value=""> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{empty_value: ""}
+
+  iex> html = ~s|<form> <input type="text" name="non-empty-value" value="something"> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{non_empty_value: "something"}
+  ```
+
+  The checked value of a radio button set is returned, or `nil` is returned if no value is checked:
+
+  ```elixir
+  iex> html = ~s|<form> <input type="radio" name="x" value="1"> <input type="radio" name="x" value="2" checked> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{x: "2"}
+
+  iex> html = ~s|<form> <input type="radio" name="x" value="1"> <input type="radio" name="x" value="2"> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{x: nil}
+  ```
+
+  All checked values of checkboxes are returned as a list, or `[]` is returned if no values are checked:
+
+  ```elixir
+  iex> html = ~s|<form> <input type="checkbox" name="x" value="1" checked> <input type="checkbox" name="x" value="2" checked> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{x: ["1", "2"]}
+
+  iex> html = ~s|<form> <input type="checkbox" name="x" value="1"> <input type="checkbox" name="x" value="2"> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{x: []}
+  ```
   """
   @spec form_fields(html()) :: %{atom() => binary() | map()}
   def form_fields(html) do
