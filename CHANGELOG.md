@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.table/2` raises if a given column name does not exist in the table.
+
 ## 0.7.1
 
 - Update `Moar` to fix bug where `HtmlQuery.form_fields/1` would return `%{}` instead of `[]` when no checkboxes

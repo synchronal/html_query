@@ -360,7 +360,7 @@ defmodule HtmlQuery do
         nil -> :all
         :all -> :all
         [first | _] = indices when is_integer(first) -> indices
-        [first | _] = names when is_binary(first) -> first_row |> table_row_values() |> Moar.Enum.find_indices(names)
+        [first | _] = names when is_binary(first) -> first_row |> table_row_values() |> Moar.Enum.find_indices!(names)
       end
 
     Enum.map(rows, &table_row_values(&1, columns))

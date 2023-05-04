@@ -519,6 +519,13 @@ defmodule HtmlQueryTest do
         ["3,3", "3,1"]
       ])
     end
+
+    test "raises when a column does not exist" do
+      assert_raise RuntimeError, ~s|Element "Col B" not present in:\n["Col 1", "Col 2", "Col 3"]|, fn ->
+        @html
+        |> Hq.table(columns: ["Col 1", "Col B"])
+      end
+    end
   end
 
   describe "text" do
