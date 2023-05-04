@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.7.2
+
 - `HtmlQuery.table/2` raises if a given column name does not exist in the table.
 
 ## 0.7.1
