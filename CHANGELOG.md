@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.table` does not return the header row if `headers: false` is set.
+
 ## 0.7.2
 
 - `HtmlQuery.table/2` raises if a given column name does not exist in the table.
@@ -38,7 +40,7 @@
 ## 0.5.0
 
 - `HtmlQuery.form_fields/1` now handles checkboxes and radio buttons.
- 
+
 ## 0.4.0
 
 - `HtmlQuery.form_fields/1` response includes `select` fields.

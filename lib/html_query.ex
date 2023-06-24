@@ -349,18 +349,28 @@ defmodule HtmlQuery do
     ["C", "A"],
     ["3", "1"]
   ]
+  iex> HtmlQuery.table(html, columns: ["C", "A"], headers: false)
+  [
+    ["3", "1"]
+  ]
   ```
   """
   @spec table(html(), keyword()) :: [[]]
   def table(html, opts \\ []) do
-    rows = [first_row | _rest] = html |> parse() |> all("tr")
+    rows = [header_row | non_header_rows] = html |> parse() |> all("tr")
 
     columns =
       case Keyword.get(opts, :columns) do
         nil -> :all
         :all -> :all
         [first | _] = indices when is_integer(first) -> indices
-        [first | _] = names when is_binary(first) -> first_row |> table_row_values() |> Moar.Enum.find_indices!(names)
+        [first | _] = names when is_binary(first) -> header_row |> table_row_values() |> Moar.Enum.find_indices!(names)
+      end
+
+    rows =
+      case Keyword.get(opts, :headers) do
+        false -> non_header_rows
+        _ -> rows
       end
 
     Enum.map(rows, &table_row_values(&1, columns))

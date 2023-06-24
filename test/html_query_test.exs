@@ -526,6 +526,16 @@ defmodule HtmlQueryTest do
         |> Hq.table(columns: ["Col 1", "Col B"])
       end
     end
+
+    test "can optionally not return the header row" do
+      @html
+      |> Hq.table(columns: ["Col 3", "Col 1"], headers: false)
+      |> assert_eq([
+        ["1,3", "1,1"],
+        ["2,3", "2,1"],
+        ["3,3", "3,1"]
+      ])
+    end
   end
 
   describe "text" do
