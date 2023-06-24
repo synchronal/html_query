@@ -2,6 +2,10 @@
 
 ## Unreleased changes
 
+## 1.0.0
+
+- No changes from 0.8.0.
+
 ## 0.8.0
 
 - `HtmlQuery.table` does not return the header row if `headers: false` is set.
