@@ -40,7 +40,7 @@ iex> html |> Hq.find(test_role: "profile") |> Hq.form_fields()
 ```elixir
 def deps do
   [
-    {:html_query, "~> 0.7"}
+    {:html_query, "~> 0.8"}
   ]
 end
 ```
