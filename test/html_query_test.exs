@@ -293,6 +293,40 @@ defmodule HtmlQueryTest do
       |> assert_eq(%{nested: %{value: ["x"]}})
     end
 
+    test "handles singular checkboxes" do
+      """
+      <form>
+        <input type="checkbox" name="singular" value="x" checked />
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{singular: ["x"]})
+    end
+
+    test "handles checkbox paired with hidden fields" do
+      """
+      <form>
+        <input type="hidden" name="paired" value="false" />
+        <input type="checkbox" name="paired" value="true" />
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{paired: []})
+
+      """
+      <form>
+        <input type="hidden" name="paired" value="false" />
+        <input type="checkbox" name="paired" value="true" checked />
+      </form>
+      """
+      |> Hq.find("form")
+      |> Hq.form_fields()
+      |> assert_eq(%{paired: ["true"]})
+    end
+
+
     test "returns `[]` when no checkboxes are checked" do
       """
       <form>
