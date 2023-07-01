@@ -244,7 +244,7 @@ defmodule HtmlQuery do
   """
   @spec form_fields(html()) :: %{atom() => binary() | map()}
   def form_fields(html),
-    do: HtmlQuery.Form.fields(html)
+    do: HtmlQuery.DeprecatedForm.fields(html)
 
   @doc """
   Prints prettified `html` with a label, and then returns the original html.

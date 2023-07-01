@@ -1,4 +1,6 @@
-defmodule HtmlQuery.FormTest do
+defmodule HtmlQuery.DeprecatedFormTest do
+  # @related [subject](lib/deprecated_form.ex)
+
   use Test.SimpleCase, async: true
   alias HtmlQuery, as: Hq
 
