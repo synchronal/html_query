@@ -3,6 +3,29 @@ defmodule HtmlQuery.Form do
 
   @moduledoc false
 
+  @doc """
+  Returns a map containing the names and values of a form's fields that a browser would send had the form been
+  submitted. In addition, expands compound input names (`person[name][first]`) into nested maps
+  (`%{person: %{name: %{first: "Alice"}}}`), and collects all checkbox values if the input name ends with `[]`
+  (`person[favorite_colors][]`). Normally accessed via `HtmlQuery.form_data`.
+  """
+  def form_data(_html, _opts \\ []),
+    do: nil
+
+  @doc """
+  Returns a list of all the form's input tags (in order). Normally accessed via `HtmlQuery.form_input_tags`.
+
+  ```elixir
+  iex> html = ~s|<form> <input type="checkbox" name="x" value="1" id="checkbox1" checked> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.Form.input_tags()
+  [input: %{type: "checkbox", name: "x", value: "1", id: "checkbox1", checked: true}]
+  ```
+  """
+  def input_tags(_html),
+    do: nil
+
+  # # # old
+
   defmodule Attrs do
     defstruct checked?: false, name: nil, type: nil, value: nil
 
