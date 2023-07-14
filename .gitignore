@@ -1,4 +1,5 @@
 *.ez
+.DS_Store
 .medic/.doctor.out
 .medic/skipped
 /.fetch
