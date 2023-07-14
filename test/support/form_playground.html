@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <style>
+      body { font-family: sans-serif; }
+      input, select { border: 1px solid #999; display: block; padding: 5px; width: 20rem; }
+      form > * { margin-top: 10px; }
+
+      input.code { font-family: monospace; width: 100% }
+    </style>
+  </head>
+  <body>
+    <div style="background-color: #eee; padding: 10px; margin-bottom: 10px;">
+      <p>
+        Run this locally to see what the browser sends to the server:
+        <input type="text" class="code" readonly value="docker run -t --rm -p 8080:8080 jmalloc/echo-server">
+      </p>
+    </div>
+
+    <form action="http://localhost:8080" method="post">
+      <input type="text" name="text-input" value="text-input">
+      <input type="email" name="email-input" value="email@example.com">
+      <select name="multiple-select" multiple>
+        <option>multi-select-first</option>
+        <option selected>multi-select-second</option>
+        <option>multi-select-third</option>
+        <option selected>multi-select-fourth</option>
+      </select>
+      <input type="submit">
+    </form>
+  </body>
+</html>
