@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 1.1.0
+
 - `HtmlQuery.table` can now optionally return the table as a list of maps.
 
 ## 1.0.0
