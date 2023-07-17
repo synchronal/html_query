@@ -316,9 +316,13 @@ defmodule HtmlQuery do
   Returns the contents of the table as a list of lists.
 
   Options:
+  * `as` - if `:lists` (the default), returns the table as a list of lists; if `:maps`, returns the table as a list of
+    maps.
   * `columns` - a list of the indices of the columns to return; a list of column headers (as strings) to return,
     assuming that the first row of the table is the columns names; or `:all` to return all columns (which is the same
     as not specifying this option all all).
+  * `headers` - if `true` (the default), returns the list of headers along with the rows. Ignored if `as` option is
+    `:map`.
 
   ```elixir
   iex> html = "<table> <tr><th>A</th><th>B</th><th>C</th></tr> <tr><td>1</td><td>2</td><td>3</td></tr> </table>"
@@ -326,6 +330,10 @@ defmodule HtmlQuery do
   [
     ["A", "B", "C"],
     ["1", "2", "3"]
+  ]
+  iex> HtmlQuery.table(html, as: :maps)
+  [
+    %{"A" => "1", "B" => "2", "C" => "3"}
   ]
   iex> HtmlQuery.table(html, columns: [0, 2])
   [
@@ -360,13 +368,24 @@ defmodule HtmlQuery do
         [first | _] = names when is_binary(first) -> header_row |> table_row_values() |> Moar.Enum.find_indices!(names)
       end
 
-    rows =
-      case Keyword.get(opts, :headers) do
-        false -> non_header_rows
-        _ -> rows
-      end
+    case Keyword.get(opts, :as, :lists) do
+      :lists ->
+        rows =
+          case Keyword.get(opts, :headers, true) do
+            false -> non_header_rows
+            true -> rows
+            other -> raise "Expected `:headers` option to be `true` or `false`, got: #{other}"
+          end
 
-    Enum.map(rows, &table_row_values(&1, columns))
+        Enum.map(rows, &table_row_values(&1, columns))
+
+      :maps ->
+        [header_row | non_header_rows] = Enum.map(rows, &table_row_values(&1, columns))
+        Enum.map(non_header_rows, &Map.new(Enum.zip([header_row, &1])))
+
+      other ->
+        raise "Expected `:as` option to be `:list` or `:map`, got: #{other}"
+    end
   end
 
   # # #

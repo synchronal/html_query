@@ -405,6 +405,34 @@ defmodule HtmlQueryTest do
         ["3,3", "3,1"]
       ])
     end
+
+    test "can optionally return the table as a list of maps" do
+      @html
+      |> Hq.table(as: :maps)
+      |> assert_eq([
+        %{"Col 1" => "1,1", "Col 2" => "1,2", "Col 3" => "1,3"},
+        %{"Col 1" => "2,1", "Col 2" => "2,2", "Col 3" => "2,3"},
+        %{"Col 1" => "3,1", "Col 2" => "3,2", "Col 3" => "3,3"}
+      ])
+    end
+
+    test "when returning a list of maps, can filter by column index or title" do
+      @html
+      |> Hq.table(as: :maps, columns: [0, 2])
+      |> assert_eq([
+        %{"Col 1" => "1,1", "Col 3" => "1,3"},
+        %{"Col 1" => "2,1", "Col 3" => "2,3"},
+        %{"Col 1" => "3,1", "Col 3" => "3,3"}
+      ])
+
+      @html
+      |> Hq.table(as: :maps, columns: ["Col 3", "Col 1"])
+      |> assert_eq([
+        %{"Col 1" => "1,1", "Col 3" => "1,3"},
+        %{"Col 1" => "2,1", "Col 3" => "2,3"},
+        %{"Col 1" => "3,1", "Col 3" => "3,3"}
+      ])
+    end
   end
 
   describe "text" do
