@@ -4,7 +4,6 @@ defmodule HtmlQuery.FormTest do
   use Test.SimpleCase, async: true
 
   describe "input_tags" do
-    @tag :skip
     test "returns all form inputs as a keyword list" do
       """
       <form>
@@ -21,15 +20,15 @@ defmodule HtmlQuery.FormTest do
       |> HtmlQuery.Form.input_tags()
       |> assert_eq(
         input: %{"name" => "name", "test-id" => "name-input", "type" => "text", "value" => "alice"},
-        input: %{"disabled" => true, "name" => "age", "type" => "number", "value" => "100"},
+        input: %{"disabled" => "disabled", "name" => "age", "type" => "number", "value" => "100"},
         input: %{"class" => "required-field", "name" => "email", "type" => "email", "value" => ""},
         textarea: %{"@content" => "Alice is 100", "name" => "about"},
         select: %{
           "name" => "favorite_color",
           "options" => [
-            %{"@content" => "red", "value" => "r"},
-            %{"@content" => "blue", "selected" => true, "value" => "b"},
-            %{"@content" => "green", "value" => "g"}
+            option: %{"@content" => "red", "value" => "r"},
+            option: %{"@content" => "blue", "selected" => "selected", "value" => "b"},
+            option: %{"@content" => "green", "value" => "g"}
           ]
         },
         input: %{"name" => "save", "type" => "submit"}

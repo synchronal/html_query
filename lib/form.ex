@@ -13,20 +13,33 @@ defmodule HtmlQuery.Form do
     do: nil
 
   @doc """
-  Returns a list of all the form's input tags (in order). Normally accessed via `HtmlQuery.form_input_tags`.
-
-  ```elixir
-  iex> html = ~s|<form> <input type="checkbox" name="x" value="1" id="checkbox1" checked> </form>|
-  iex> html |> HtmlQuery.find("form") |> HtmlQuery.Form.input_tags()
-  [input: %{type: "checkbox", name: "x", value: "1", id: "checkbox1", checked: true}]
-  ```
+  Returns a list of all the form's input tags (in order). Should be accessed via `HtmlQuery.form_input_tags`.
   """
-  def input_tags(_html),
-    do: nil
+  def input_tags(html),
+    do: HtmlQuery.all(html, "input, select, textarea") |> List.foldr([], &input_tag/2)
+
+  # # #
+
+  @allowed_input_tags ~w[input option select textarea]
+  defp input_tag({tag, attrs, content}, acc) when tag in @allowed_input_tags do
+    tag = String.to_atom(tag)
+    map = Map.new(attrs)
+
+    map =
+      case {tag, content} do
+        {:select, options} -> Map.put(map, "options", List.foldr(options, [], &input_tag/2))
+        {_, []} -> map
+        {_, other} -> Map.put(map, "@content", Enum.join(other))
+      end
+
+    [{tag, map} | acc]
+  end
 
   # # # old
 
   defmodule Attrs do
+    @moduledoc false
+
     defstruct checked?: false, name: nil, type: nil, value: nil
 
     def new(floki_attrs) do
