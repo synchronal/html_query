@@ -9,8 +9,12 @@ defmodule HtmlQuery.Form do
   (`%{person: %{name: %{first: "Alice"}}}`), and collects all checkbox values if the input name ends with `[]`
   (`person[favorite_colors][]`). Normally accessed via `HtmlQuery.form_data`.
   """
-  def form_data(_html, _opts \\ []),
-    do: nil
+  def form_data(html, _opts \\ []) do
+    html
+    |> input_tags()
+    |> Enum.reduce(%{}, &form_datum/2)
+    |> Moar.Map.deep_atomize_keys()
+  end
 
   @doc """
   Returns a list of all the form's input tags (in order). Should be accessed via `HtmlQuery.form_input_tags`.
@@ -20,8 +24,7 @@ defmodule HtmlQuery.Form do
 
   # # #
 
-  @allowed_input_tags ~w[input option select textarea]
-  defp input_tag({tag, attrs, content}, acc) when tag in @allowed_input_tags do
+  defp input_tag({tag, attrs, content}, acc) when tag in ~w[input option select textarea] do
     tag = String.to_atom(tag)
     map = Map.new(attrs)
 
@@ -33,6 +36,42 @@ defmodule HtmlQuery.Form do
       end
 
     [{tag, map} | acc]
+  end
+
+  defp form_datum({tag, attrs}, acc) when tag in ~w[input option select textarea]a do
+    has_name? = Moar.Term.present?(attrs["name"]) || tag == :option
+    has_content? = Moar.Term.present?(attrs["@content"])
+    not_disabled? = !Map.has_key?(attrs, "disabled")
+    checkable? = attrs["type"] in ["checkbox", "radio"]
+    checked? = Map.has_key?(attrs, "checked")
+    multiple? = tag == :select && Map.has_key?(attrs, "multiple")
+
+    case {has_name? && not_disabled?, tag} do
+      {false, _} ->
+        acc
+
+      {true, :input} ->
+        if !checkable? || (checkable? && checked?),
+          do: Map.put(acc, attrs["name"], attrs["value"]),
+          else: acc
+
+      {true, :option} ->
+        if attrs["selected"] == "selected",
+          do: [attrs["value"] || attrs["@content"] | acc],
+          else: acc
+
+      {true, :select} ->
+        options = Map.get(attrs, "options", []) |> List.foldr([], &form_datum/2)
+
+        if multiple?,
+          do: Map.put(acc, attrs["name"], options || []),
+          else: Map.put(acc, attrs["name"], List.last(options))
+
+      {true, :textarea} ->
+        if has_content?,
+          do: Map.put(acc, attrs["name"], attrs["@content"]),
+          else: acc
+    end
   end
 
   # # # old
