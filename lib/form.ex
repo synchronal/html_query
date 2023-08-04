@@ -13,6 +13,7 @@ defmodule HtmlQuery.Form do
     html
     |> input_tags()
     |> Enum.reduce(%{}, &form_datum/2)
+    |> expand_composite_keys()
     |> Moar.Map.deep_atomize_keys()
   end
 
@@ -74,6 +75,18 @@ defmodule HtmlQuery.Form do
     end
   end
 
+  # todo: move to Moar.Map
+  def expand_composite_key(key),
+    do: String.split(key, ["[", "]"], trim: true)
+
+  # todo: move to Moar.Map
+  def expand_composite_keys(map) do
+    Enum.reduce(map, %{}, fn {key, value}, acc ->
+      keys = Enum.map(expand_composite_key(key), &Access.key(&1, %{}))
+      get_and_update_in(acc, keys, &{&1, value}) |> elem(1)
+    end)
+  end
+
   # # # old
 
   defmodule Attrs do
@@ -100,7 +113,7 @@ defmodule HtmlQuery.Form do
   def fields(html, _opts \\ []) do
     HtmlQuery.all(html, "input[name], select[name], textarea[name]")
     |> Enum.reduce(%{}, &field/2)
-    |> expand_input_names()
+    |> expand_composite_keys()
     |> Moar.Map.deep_atomize_keys()
   end
 
@@ -138,26 +151,6 @@ defmodule HtmlQuery.Form do
 
       {_, _} ->
         acc
-    end
-  end
-
-  @spec expand_input_names(map()) :: map()
-  defp expand_input_names(map) do
-    Enum.reduce(map, %{}, fn {key, value}, acc ->
-      case expand_input_name(key) do
-        {key1, key2} -> %{key1 => %{key2 => value}}
-        key -> %{key => value}
-      end
-      |> Moar.Map.deep_merge(acc)
-    end)
-  end
-
-  @spec expand_input_name(binary()) :: binary() | {binary(), binary()}
-  defp expand_input_name(input_name) do
-    case Regex.run(~r|(.*)\[(.*)\]|, input_name) do
-      [_, child, ""] -> expand_input_name(child)
-      [_, parent, child] -> {parent, child}
-      _ -> input_name
     end
   end
 end

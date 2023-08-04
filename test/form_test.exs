@@ -204,5 +204,81 @@ defmodule HtmlQuery.FormTest do
         multi_select: ["value in attr 1", "value in content 2"]
       })
     end
+
+    test "turns composite name into nested maps" do
+      """
+      <form>
+        <input type="hidden" name="form-id" value="abc123">
+        <input type="radio" name="account[active]" value="yes" checked>
+        <input type="radio" name="account[active]" value="no">
+        <input type="text" name="account[person][name]" value="Alice">
+        <input type="email" name="account[person][email]" value="alice@example.com">
+      </form>
+      """
+      |> HtmlQuery.Form.form_data()
+      |> assert_eq(%{
+        form_id: "abc123",
+        account: %{
+          active: "yes",
+          person: %{
+            name: "Alice",
+            email: "alice@example.com"
+          }
+        }
+      })
+    end
+  end
+
+  describe "expand_composite_key" do
+    test "returns a 1-item list when the input when not a composite key" do
+      assert HtmlQuery.Form.expand_composite_key("a") == ["a"]
+    end
+
+    test "returns a list keys when a composite key" do
+      assert HtmlQuery.Form.expand_composite_key("a[b]") == ["a", "b"]
+      assert HtmlQuery.Form.expand_composite_key("a[b][c]") == ["a", "b", "c"]
+      assert HtmlQuery.Form.expand_composite_key("a[b][c][d]") == ["a", "b", "c", "d"]
+    end
+  end
+
+  describe "expand_composite_keys" do
+    test "handles non-composite keys" do
+      assert HtmlQuery.Form.expand_composite_keys(%{"a" => "1"}) == %{"a" => "1"}
+      assert HtmlQuery.Form.expand_composite_keys(%{"a" => "1", "b" => "2"}) == %{"a" => "1", "b" => "2"}
+    end
+
+    test "handles composite keys" do
+      assert HtmlQuery.Form.expand_composite_keys(%{"a[b]" => "1"}) == %{"a" => %{"b" => "1"}}
+
+      assert HtmlQuery.Form.expand_composite_keys(%{
+               "a[b]" => "1",
+               "c[d]" => "2"
+             }) == %{
+               "a" => %{"b" => "1"},
+               "c" => %{"d" => "2"}
+             }
+    end
+
+    test "handles nested composite keys" do
+      assert HtmlQuery.Form.expand_composite_keys(%{"a[b][c]" => "1"}) == %{"a" => %{"b" => %{"c" => "1"}}}
+
+      assert HtmlQuery.Form.expand_composite_keys(%{
+               "a[b]" => "1",
+               "a[c][d]" => "2",
+               "a[c][e]" => "3"
+             }) == %{
+               "a" => %{
+                 "b" => "1",
+                 "c" => %{
+                   "d" => "2",
+                   "e" => "3"
+                 }
+               }
+             }
+    end
+
+    test "fails when a scalar and a map are both specified for the same key" do
+      assert_raise BadMapError, fn -> HtmlQuery.Form.expand_composite_keys(%{"a[b]" => "1", "a[b][c]" => "2"}) end
+    end
   end
 end
