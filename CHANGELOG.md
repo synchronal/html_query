@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Fix text of error message produced by `HtmlQuery.table`
+
 ## 1.1.0
 
 - `HtmlQuery.table` can now optionally return the table as a list of maps.

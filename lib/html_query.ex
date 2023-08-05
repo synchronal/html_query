@@ -384,7 +384,7 @@ defmodule HtmlQuery do
         Enum.map(non_header_rows, &Map.new(Enum.zip([header_row, &1])))
 
       other ->
-        raise "Expected `:as` option to be `:list` or `:map`, got: #{other}"
+        raise "Expected `:as` option to be `:lists` or `:maps`, got: #{other}"
     end
   end
 
