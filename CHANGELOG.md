@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 1.1.1
+
 - Fix text of error message produced by `HtmlQuery.table`
 
 ## 1.1.0
