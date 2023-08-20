@@ -42,7 +42,7 @@ See the documentation for the main `HtmlQuery` module for details and more examp
 ```elixir
 def deps do
   [
-    {:html_query, "~> 1.1"}
+    {:html_query, "~> 1.2"}
   ]
 end
 ```

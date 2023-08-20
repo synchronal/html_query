@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 1.2.0
+
 - `HtmlQuery.reject/2` removes nodes that match the given selector.
 
 ## 1.1.1
