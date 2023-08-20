@@ -35,9 +35,10 @@ defmodule HtmlQuery do
 
   ## Utility functions
 
-  | `inspect_html/2` | prints prettified HTML with a label |
-  | `normalize/1`    | parses and re-stringifies HTML      |
-  | `pretty/1`       | prettifies HTML                     |
+  | `inspect_html/2` | prints prettified HTML with a label   |
+  | `normalize/1`    | parses and re-stringifies HTML        |
+  | `pretty/1`       | prettifies HTML                       |
+  | `reject/2`       | removes nodes that match the selector |
 
 
   ## Alias
@@ -391,11 +392,18 @@ defmodule HtmlQuery do
     do: html |> parse() |> Floki.raw_html()
 
   @doc """
-  Returns `html` as a prettified string, using `Floki.raw_html/2` and its `pretty: true` option.
+  Returns `html` as a prettified string (delgates to `Floki.raw_html/2` with the `pretty: true` option).
   """
   @spec pretty(html()) :: binary()
   def pretty(html),
     do: html |> parse() |> Floki.raw_html(encode: false, pretty: true)
+
+  @doc """
+  Returns `html` after removing all nodes that don't match `selector` (delegates to `Floki.filter_out/2`).
+  """
+  @spec reject(html(), HtmlQuery.Css.selector()) :: html()
+  def reject(html, selector),
+    do: Floki.filter_out(html, HtmlQuery.Css.selector(selector))
 
   # # # Private Functions
 

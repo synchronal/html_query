@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.reject/2` removes nodes that match the given selector.
+
 ## 1.1.1
 
 - Fix text of error message produced by `HtmlQuery.table`

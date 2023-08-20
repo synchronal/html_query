@@ -331,6 +331,26 @@ defmodule HtmlQueryTest do
     end
   end
 
+  describe "reject" do
+    test "returns the given html after removing nodes that match the selector" do
+      """
+      <table>
+        <tr id="row-1"> <td> 1 </td> </tr>
+        <tr id="row-2"> <td> 2 </td> </tr>
+        <tr id="row-3"> <td> 3 </td> </tr>
+      </table>
+      """
+      |> Hq.reject(id: "row-2")
+      |> Hq.pretty()
+      |> assert_eq("""
+      <table>
+        <tr id="row-1"> <td> 1 </td> </tr>
+        <tr id="row-3"> <td> 3 </td> </tr>
+      </table>
+      """, whitespace: :squish)
+    end
+  end
+
   describe "table" do
     @html """
     <table>
