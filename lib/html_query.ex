@@ -20,11 +20,6 @@ defmodule HtmlQuery do
   | `find/2`        | return the first element that matches the selector |
   | `find!/2`       | return the only element that matches the selector  |
 
-  ## Parsing functions
-
-  | `parse/1`     | parses an HTML fragment into a [Floki HTML tree] |
-  | `parse_doc/1` | parses an HTML doc into a [Floki HTML tree]      |
-
   ## Extraction functions
 
   | `attr/2`        | returns the attribute value as a string              |
@@ -32,6 +27,11 @@ defmodule HtmlQuery do
   | `meta_tags/1`   | returns the names and values of metadata fields      |
   | `table/2`       | returns the cells of a table as a list of lists      |
   | `text/1`        | returns the text contents as a single string         |
+
+  ## Parsing functions
+
+  | `parse/1`     | parses an HTML fragment into a [Floki HTML tree] |
+  | `parse_doc/1` | parses an HTML doc into a [Floki HTML tree]      |
 
   ## Utility functions
 
@@ -98,7 +98,7 @@ defmodule HtmlQuery do
   """
   @type html() :: binary() | String.Chars.t() | Floki.html_tree() | Floki.html_node()
 
-  # # #
+  # # # Main Query Functions
 
   @doc """
   Finds all elements in `html` that match `selector`, returning a Floki HTML tree.
@@ -113,7 +113,8 @@ defmodule HtmlQuery do
   ```
   """
   @spec all(html(), HtmlQuery.Css.selector()) :: Floki.html_tree()
-  def all(html, selector), do: html |> parse() |> Floki.find(HtmlQuery.Css.selector(selector))
+  def all(html, selector),
+    do: html |> parse() |> Floki.find(HtmlQuery.Css.selector(selector))
 
   @doc """
   Finds the first element in `html` that matches `selector`, returning a Floki HTML node.
@@ -125,15 +126,17 @@ defmodule HtmlQuery do
   ```
   """
   @spec find(html(), HtmlQuery.Css.selector()) :: Floki.html_node() | nil
-  def find(html, selector), do: all(html, selector) |> List.first()
+  def find(html, selector),
+    do: all(html, selector) |> List.first()
 
   @doc """
   Like `find/2` but raises unless exactly one element is found.
   """
   @spec find!(html(), HtmlQuery.Css.selector()) :: Floki.html_node()
-  def find!(html, selector), do: all(html, selector) |> first!("Selector: #{HtmlQuery.Css.selector(selector)}")
+  def find!(html, selector),
+    do: all(html, selector) |> first!("Selector: #{HtmlQuery.Css.selector(selector)}")
 
-  # # #
+  # # # Extraction Functions
 
   @doc """
   Returns the value of `attr` from the outermost element of `html`.
@@ -146,7 +149,8 @@ defmodule HtmlQuery do
   ```
   """
   @spec attr(html(), attr()) :: binary() | nil
-  def attr(nil, _attr), do: nil
+  def attr(nil, _attr),
+    do: nil
 
   def attr(html, attr) do
     html
@@ -155,26 +159,6 @@ defmodule HtmlQuery do
     |> Floki.attribute(attr |> to_string() |> Moar.String.dasherize())
     |> List.first()
   end
-
-  @doc """
-  Returns the text value of `html`.
-
-  ```elixir
-  iex> html = ~s|<select> <option value="a" selected>apples</option> <option value="b">bananas</option> </select>|
-  iex> HtmlQuery.find!(html, "select option[selected]") |> HtmlQuery.text()
-  "apples"
-  ```
-  """
-  @spec text(html()) :: binary()
-  def text(html) do
-    html
-    |> parse()
-    |> first!("Consider using Enum.map(html, &#{@module_name}.text/1)")
-    |> Floki.text(sep: " ")
-    |> String.trim()
-  end
-
-  # # #
 
   @doc """
   Returns a map containing the form fields of form `selector` in `html`. Because it returns a map, any information
@@ -247,21 +231,6 @@ defmodule HtmlQuery do
     do: HtmlQuery.Form.fields(html)
 
   @doc """
-  Prints prettified `html` with a label, and then returns the original html.
-  """
-  @spec inspect_html(html(), binary()) :: html()
-  def inspect_html(html, label \\ "INSPECTED HTML") do
-    """
-    === #{label}:
-
-    #{pretty(html)}
-    """
-    |> IO.puts()
-
-    html
-  end
-
-  @doc """
   Extracts all the meta tags from `html`, returning a list of maps.
 
   ```elixir
@@ -271,46 +240,8 @@ defmodule HtmlQuery do
   ```
   """
   @spec meta_tags(html()) :: [%{binary() => binary()}]
-  def meta_tags(html), do: html |> parse() |> extract_meta_tags()
-
-  @doc """
-  Parses and then re-stringifies `html`, increasing the liklihood that two equivalent HTML strings can
-  be considered equal.
-
-  ```elixir
-  iex> a = ~s|<p id="color">green</p>|
-  iex> b = ~s|<p  id = "color" >green</p>|
-  iex> a == b
-  false
-  iex> HtmlQuery.normalize(a) == HtmlQuery.normalize(b)
-  true
-  ```
-  """
-  @spec normalize(html()) :: binary()
-  def normalize(html), do: html |> parse() |> Floki.raw_html()
-
-  @doc """
-  Parses an HTML fragment using `Floki.parse_fragment!/1`, returning a Floki HTML tree.
-  """
-  @spec parse(html()) :: Floki.html_tree()
-  def parse(html) when is_binary(html), do: html |> Floki.parse_fragment!()
-  def parse(html) when is_list(html), do: html
-  def parse({element, attrs, contents}), do: [{element, attrs, contents}]
-  def parse(%_{} = html), do: html |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse()
-
-  @doc """
-  Parses an HTML document using `Floki.parse_document!/1`, returning a Floki HTML tree.
-  """
-  @spec parse_doc(html()) :: Floki.html_tree()
-  def parse_doc(html) when is_binary(html), do: html |> Floki.parse_document!()
-  def parse_doc(html) when is_list(html), do: html
-  def parse_doc(%_{} = html), do: html |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse_doc()
-
-  @doc """
-  Returns `html` as a prettified string, using `Floki.raw_html/2` and its `pretty: true` option.
-  """
-  @spec pretty(html()) :: binary()
-  def pretty(html), do: html |> parse() |> Floki.raw_html(encode: false, pretty: true)
+  def meta_tags(html),
+    do: html |> parse() |> extract_meta_tags()
 
   @doc """
   Returns the contents of the table as a list of lists.
@@ -388,20 +319,98 @@ defmodule HtmlQuery do
     end
   end
 
-  # # #
+  @doc """
+  Returns the text value of `html`.
+
+  ```elixir
+  iex> html = ~s|<select> <option value="a" selected>apples</option> <option value="b">bananas</option> </select>|
+  iex> HtmlQuery.find!(html, "select option[selected]") |> HtmlQuery.text()
+  "apples"
+  ```
+  """
+  @spec text(html()) :: binary()
+  def text(html) do
+    html
+    |> parse()
+    |> first!("Consider using Enum.map(html, &#{@module_name}.text/1)")
+    |> Floki.text(sep: " ")
+    |> String.trim()
+  end
+
+  # # # Parsing Functions
+
+  @doc """
+  Parses an HTML fragment using `Floki.parse_fragment!/1`, returning a Floki HTML tree.
+  """
+  @spec parse(html()) :: Floki.html_tree()
+  def parse(html) when is_binary(html), do: html |> Floki.parse_fragment!()
+  def parse(html) when is_list(html), do: html
+  def parse({element, attrs, contents}), do: [{element, attrs, contents}]
+  def parse(%_{} = html), do: html |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse()
+
+  @doc """
+  Parses an HTML document using `Floki.parse_document!/1`, returning a Floki HTML tree.
+  """
+  @spec parse_doc(html()) :: Floki.html_tree()
+  def parse_doc(html) when is_binary(html), do: html |> Floki.parse_document!()
+  def parse_doc(html) when is_list(html), do: html
+  def parse_doc(%_{} = html), do: html |> Moar.Protocol.implements!(String.Chars) |> to_string() |> parse_doc()
+
+  # # # Utility Functions
+
+  @doc """
+  Prints prettified `html` with a label, and then returns the original html.
+  """
+  @spec inspect_html(html(), binary()) :: html()
+  def inspect_html(html, label \\ "INSPECTED HTML") do
+    """
+    === #{label}:
+
+    #{pretty(html)}
+    """
+    |> IO.puts()
+
+    html
+  end
+
+  @doc """
+  Parses and then re-stringifies `html`, increasing the liklihood that two equivalent HTML strings can
+  be considered equal.
+
+  ```elixir
+  iex> a = ~s|<p id="color">green</p>|
+  iex> b = ~s|<p  id = "color" >green</p>|
+  iex> a == b
+  false
+  iex> HtmlQuery.normalize(a) == HtmlQuery.normalize(b)
+  true
+  ```
+  """
+  @spec normalize(html()) :: binary()
+  def normalize(html),
+    do: html |> parse() |> Floki.raw_html()
+
+  @doc """
+  Returns `html` as a prettified string, using `Floki.raw_html/2` and its `pretty: true` option.
+  """
+  @spec pretty(html()) :: binary()
+  def pretty(html),
+    do: html |> parse() |> Floki.raw_html(encode: false, pretty: true)
+
+  # # # Private Functions
 
   @spec extract_meta_tags(html()) :: [map()]
   defp extract_meta_tags(html),
     do: all(html, "meta") |> Enum.map(fn {"meta", attrs, _} -> Map.new(attrs) end)
 
   @spec first!(html(), binary()) :: html()
-  defp first!([], hint),
-    do:
-      raise(QueryError, """
-      Expected a single HTML node but found none
+  defp first!([], hint) do
+    raise(QueryError, """
+    Expected a single HTML node but found none
 
-      #{hint}
-      """)
+    #{hint}
+    """)
+  end
 
   defp first!([node], _hint), do: node
 
