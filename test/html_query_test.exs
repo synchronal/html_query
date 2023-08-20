@@ -342,12 +342,15 @@ defmodule HtmlQueryTest do
       """
       |> Hq.reject(id: "row-2")
       |> Hq.pretty()
-      |> assert_eq("""
-      <table>
-        <tr id="row-1"> <td> 1 </td> </tr>
-        <tr id="row-3"> <td> 3 </td> </tr>
-      </table>
-      """, whitespace: :squish)
+      |> assert_eq(
+        """
+        <table>
+          <tr id="row-1"> <td> 1 </td> </tr>
+          <tr id="row-3"> <td> 3 </td> </tr>
+        </table>
+        """,
+        whitespace: :squish
+      )
     end
   end
 

@@ -74,7 +74,7 @@ defmodule HtmlQuery do
   ["apples", "bananas"]
   ```
 
-  Use a keyword list as the selector (see `HtmlQuery.CSS` for details on selectors):
+  Use a keyword list as the selector (see `HtmlQuery.Css` for details on selectors):
 
   ```elixir
   iex> html = ~s|<div> <a href="/logout" test-role="logout-link">logout</a> </div>|
@@ -400,6 +400,12 @@ defmodule HtmlQuery do
 
   @doc """
   Returns `html` after removing all nodes that don't match `selector` (delegates to `Floki.filter_out/2`).
+
+  ```elixir
+  iex> html = ~s|<div> <span id="name">Alice</span> <span id="password">topaz</span> </div>|
+  iex> HtmlQuery.reject(html, id: "password") |> HtmlQuery.normalize()
+  ~s|<div><span id="name">Alice</span></div>|
+  ```
   """
   @spec reject(html(), HtmlQuery.Css.selector()) :: html()
   def reject(html, selector),
