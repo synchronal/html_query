@@ -2,6 +2,10 @@
 
 ## Unreleased changes
 
+## 1.2.1
+
+- Fix compiler warnings on `HtmlQuery.reject/2`.
+
 ## 1.2.0
 
 - `HtmlQuery.reject/2` removes nodes that match the given selector.
