@@ -312,8 +312,9 @@ defmodule HtmlQuery do
         Enum.map(rows, &table_row_values(&1, columns))
 
       :maps ->
-        [header_row | non_header_rows] = Enum.map(rows, &table_row_values(&1, columns))
-        Enum.map(non_header_rows, &Map.new(Enum.zip([header_row, &1])))
+        rows
+        |> Enum.map(&table_row_values(&1, columns))
+        |> Moar.Enum.lists_to_maps(:first_list)
 
       other ->
         raise "Expected `:as` option to be `:lists` or `:maps`, got: #{other}"
