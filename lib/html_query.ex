@@ -410,7 +410,7 @@ defmodule HtmlQuery do
   """
   @spec reject(html(), HtmlQuery.Css.selector()) :: html()
   def reject(html, selector),
-    do: Floki.filter_out(html, HtmlQuery.Css.selector(selector))
+    do: html |> parse() |> Floki.filter_out(HtmlQuery.Css.selector(selector))
 
   # # # Private Functions
 
