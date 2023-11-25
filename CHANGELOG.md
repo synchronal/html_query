@@ -2,6 +2,10 @@
 
 ## Unreleased changes
 
+## 1.2.2
+
+- Update deps.
+
 ## 1.2.1
 
 - Fix compiler warnings on `HtmlQuery.reject/2`.
