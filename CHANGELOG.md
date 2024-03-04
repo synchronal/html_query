@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Documentation updates
+
 ## 1.2.2
 
 - Update deps.

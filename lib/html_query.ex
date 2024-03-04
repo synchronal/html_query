@@ -2,23 +2,21 @@ defmodule HtmlQuery do
   # @related [test](/test/html_query_test.exs)
 
   @moduledoc """
-  Some simple HTML query functions. Delegates the hard work to [Floki](https://hex.pm/packages/floki).
+  A concise HTML query API. HTML parsing is handled by [Floki](https://hex.pm/packages/floki).
 
   ## Data types
 
-  All functions accept HTML in the form of a string, a Floki HTML tree, or a Floki HTML node.
-  Others expect only a Floki HTML node or a Floki HTML tree. See `t:HtmlQuery.html/0`.
+  All functions can accept HTML in the form of a string, a Floki HTML tree, a Floki HTML node, or anything that
+  implements the `String.Chars` protocol. See `t:HtmlQuery.html/0`.
 
   Some functions take a CSS selector, which can be a string, a keyword list, or a list.
   See `t:HtmlQuery.Css.selector/0`.
 
-  ## Main query functions
+  ## Query functions
 
-  The main query functions take an HTML string or some parsed HTML, and a selector.
-
-  | `all/2`         | return all elements matching the selector          |
-  | `find/2`        | return the first element that matches the selector |
-  | `find!/2`       | return the only element that matches the selector  |
+  | `all/2`   | return all elements matching the selector                   |
+  | `find/2`  | return the first element that matches the selector          |
+  | `find!/2` | return the only element that matches the selector, or raise |
 
   ## Extraction functions
 
@@ -44,6 +42,7 @@ defmodule HtmlQuery do
   ## Alias
 
   If you use HtmlQuery a lot, you may want to alias it to the recommended shortcut "Hq":
+
   ```elixir
   alias HtmlQuery, as: Hq
   ```
