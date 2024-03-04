@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 1.2.3
+
 - Documentation updates
 
 ## 1.2.2
