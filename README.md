@@ -17,7 +17,8 @@ The input can be:
   below.
 
 We created a related library called [XmlQuery](https://hexdocs.pm/xml_query/readme.html) which has the same API but
-is used for querying XML.
+is used for querying XML. You can read more about them in
+[Querying HTML and XML in Elixir with HtmlQuery and XmlQuery](https://eahanson.com/articles/html-query-xml-query).
 
 This library is MIT licensed and is part of a growing number of Elixir open source libraries published at
 [github.com/synchronal](https://github.com/synchronal#elixir).

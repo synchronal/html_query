@@ -4,6 +4,10 @@ defmodule HtmlQuery do
   @moduledoc """
   A concise HTML query API. HTML parsing is handled by [Floki](https://hex.pm/packages/floki).
 
+  We created a related library called [XmlQuery](https://hexdocs.pm/xml_query/readme.html) which has the same API but
+  is used for querying XML. You can read more about them in
+  [Querying HTML and XML in Elixir with HtmlQuery and XmlQuery](https://eahanson.com/articles/html-query-xml-query).
+
   ## Data types
 
   All functions can accept HTML in the form of a string, a Floki HTML tree, a Floki HTML node, or anything that
