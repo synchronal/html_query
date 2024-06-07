@@ -255,7 +255,7 @@ defmodule HtmlQuery do
     maps.
   * `columns` - a list of the indices of the columns to return; a list of column headers (as strings) to return,
     assuming that the first row of the table is the columns names; or `:all` to return all columns (which is the same
-    as not specifying this option all all).
+    as not specifying this option at all).
   * `headers` - if `true` (the default), returns the list of headers along with the rows. Ignored if `as` option is
     `:map`.
 
