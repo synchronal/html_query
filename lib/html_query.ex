@@ -291,7 +291,7 @@ defmodule HtmlQuery do
   ]
   ```
   """
-  @spec table(html(), keyword()) :: [[]]
+  @spec table(html(), keyword()) :: [[]] | [map()]
   def table(html, opts \\ []) do
     rows = [header_row | non_header_rows] = html |> parse() |> all("tr")
 
