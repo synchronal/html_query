@@ -17,7 +17,7 @@ defmodule HtmlQuery.MixProject do
       description: "HTML query functions",
       dialyzer: dialyzer(),
       docs: docs(),
-      elixir: "~> 1.13",
+      elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       homepage_url: @scm_url,
       name: "HtmlQuery",

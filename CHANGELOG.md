@@ -2,6 +2,9 @@
 
 ## Unreleased changes
 
+- require Elixir 1.15 or later
+- test against the latest Elixir and Erlang
+
 ## 1.2.3
 
 - Documentation updates
