@@ -23,6 +23,8 @@ is used for querying XML. You can read more about them in
 This library is MIT licensed and is part of a growing number of Elixir open source libraries published at
 [github.com/synchronal](https://github.com/synchronal#elixir).
 
+This library is tested against the most recent 3 versions of Elixir and Erlang.
+
 ## Installation
 
 ```elixir
