@@ -24,11 +24,11 @@ defmodule HtmlQuery do
 
   ## Extraction functions
 
-  | `attr/2`        | returns the attribute value as a string              |
-  | `form_fields/1` | returns the names and values of form fields as a map |
-  | `meta_tags/1`   | returns the names and values of metadata fields      |
-  | `table/2`       | returns the cells of a table as a list of lists      |
-  | `text/1`        | returns the text contents as a single string         |
+  | `attr/2`        | returns the attribute value as a string                 |
+  | `form_fields/1` | returns the names and values of form fields as a map    |
+  | `meta_tags/1`   | returns the names and values of metadata fields         |
+  | `table/2`       | returns the cells of a table as a list of lists or maps |
+  | `text/1`        | returns the text contents as a single string            |
 
   ## Parsing functions
 
@@ -253,11 +253,16 @@ defmodule HtmlQuery do
   Options:
   * `as` - if `:lists` (the default), returns the table as a list of lists; if `:maps`, returns the table as a list of
     maps.
-  * `columns` - a list of the indices of the columns to return; a list of column headers (as strings) to return,
+  * `only` - a list of the indices of the columns to return; a list of column headers (as strings) to return,
     assuming that the first row of the table is the columns names; or `:all` to return all columns (which is the same
     as not specifying this option at all).
+  * `except` - returns all the columns except the ones whose indices or names are given. `only` and `except` can be
+    combined to further reduce the set of columns.
   * `headers` - if `true` (the default), returns the list of headers along with the rows. Ignored if `as` option is
     `:map`.
+
+  Deprecated options:
+  * `columns` - use `only` instead.
 
   ```elixir
   iex> html = "<table> <tr><th>A</th><th>B</th><th>C</th></tr> <tr><td>1</td><td>2</td><td>3</td></tr> </table>"
@@ -270,22 +275,27 @@ defmodule HtmlQuery do
   [
     %{"A" => "1", "B" => "2", "C" => "3"}
   ]
-  iex> HtmlQuery.table(html, columns: [0, 2])
+  iex> HtmlQuery.table(html, only: [0, 2])
   [
     ["A", "C"],
     ["1", "3"]
   ]
-  iex> HtmlQuery.table(html, columns: [2, 0])
+  iex> HtmlQuery.table(html, only: [2, 0])
   [
     ["C", "A"],
     ["3", "1"]
   ]
-  iex> HtmlQuery.table(html, columns: ["C", "A"])
+  iex> HtmlQuery.table(html, only: ["C", "A"])
   [
     ["C", "A"],
     ["3", "1"]
   ]
-  iex> HtmlQuery.table(html, columns: ["C", "A"], headers: false)
+  iex> HtmlQuery.table(html, except: ["C", "A"])
+  [
+    ["B"],
+    ["2"]
+  ]
+  iex> HtmlQuery.table(html, only: ["C", "A"], headers: false)
   [
     ["3", "1"]
   ]
@@ -294,14 +304,23 @@ defmodule HtmlQuery do
   @spec table(html(), keyword()) :: [[]] | [map()]
   def table(html, opts \\ []) do
     rows = [header_row | non_header_rows] = html |> parse() |> all("tr")
+    header_row_values = header_row |> all("th,td") |> Enum.map(&text/1)
 
-    columns =
-      case Keyword.get(opts, :columns) do
-        nil -> :all
-        :all -> :all
+    only =
+      case Keyword.get(opts, :only) || Keyword.get(opts, :columns, :all) do
+        :all -> Range.to_list(0..(length(header_row_values) - 1))
+        [first | _] = names when is_binary(first) -> Moar.Enum.find_indices!(header_row_values, names)
         [first | _] = indices when is_integer(first) -> indices
-        [first | _] = names when is_binary(first) -> header_row |> table_row_values() |> Moar.Enum.find_indices!(names)
       end
+
+    except =
+      case Keyword.get(opts, :except) do
+        nil -> []
+        [first | _] = names when is_binary(first) -> Moar.Enum.find_indices!(header_row_values, names)
+        [first | _] = indices when is_integer(first) -> indices
+      end
+
+    columns = only -- except
 
     case Keyword.get(opts, :as, :lists) do
       :lists ->
@@ -442,6 +461,6 @@ defmodule HtmlQuery do
   end
 
   @spec table_row_values(html(), :all | [integer()]) :: [binary()]
-  defp table_row_values(row, columns \\ :all),
+  defp table_row_values(row, columns),
     do: row |> all("td,th") |> Moar.Enum.take_at(columns) |> Enum.map(&text/1)
 end

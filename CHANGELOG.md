@@ -2,6 +2,9 @@
 
 ## Unreleased changes
 
+- deprecate `HtmlQuery.table`'s `columns` option in favor of `only`
+- add `except` option to `HtmlQuery.table`
+
 ## 1.3.0
 
 - require Elixir 1.15 or later

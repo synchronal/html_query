@@ -381,7 +381,7 @@ defmodule HtmlQueryTest do
 
     test "`:all` columns can be requested explicitly" do
       @html
-      |> Hq.table(columns: :all)
+      |> Hq.table(only: :all)
       |> assert_eq([
         ["Col 1", "Col 2", "Col 3"],
         ["1,1", "1,2", "1,3"],
@@ -390,9 +390,9 @@ defmodule HtmlQueryTest do
       ])
     end
 
-    test "can filter certain columns by index" do
+    test "can filter certain columns by index via `only: [...]`" do
       @html
-      |> Hq.table(columns: [0, 2])
+      |> Hq.table(only: [0, 2])
       |> assert_eq([
         ["Col 1", "Col 3"],
         ["1,1", "1,3"],
@@ -401,9 +401,20 @@ defmodule HtmlQueryTest do
       ])
     end
 
-    test "can filter certain columns by column title" do
+    test "can reject certain columns by index via `except: [...]`" do
       @html
-      |> Hq.table(columns: ["Col 3", "Col 1"])
+      |> Hq.table(except: [0, 2])
+      |> assert_eq([
+        ["Col 2"],
+        ["1,2"],
+        ["2,2"],
+        ["3,2"]
+      ])
+    end
+
+    test "can filter certain columns by column title via `only: [...]`" do
+      @html
+      |> Hq.table(only: ["Col 3", "Col 1"])
       |> assert_eq([
         ["Col 3", "Col 1"],
         ["1,3", "1,1"],
@@ -412,16 +423,38 @@ defmodule HtmlQueryTest do
       ])
     end
 
+    test "can reject certain columns by column title via `except: [...]`" do
+      @html
+      |> Hq.table(except: ["Col 1", "Col 3"])
+      |> assert_eq([
+        ["Col 2"],
+        ["1,2"],
+        ["2,2"],
+        ["3,2"]
+      ])
+    end
+
+    test "can combine `only` and `except`" do
+      @html
+      |> Hq.table(only: ["Col 1", "Col 3"], except: ["Col 3"])
+      |> assert_eq([
+        ["Col 1"],
+        ["1,1"],
+        ["2,1"],
+        ["3,1"]
+      ])
+    end
+
     test "raises when a column does not exist" do
       assert_raise RuntimeError, ~s|Element "Col B" not present in:\n["Col 1", "Col 2", "Col 3"]|, fn ->
         @html
-        |> Hq.table(columns: ["Col 1", "Col B"])
+        |> Hq.table(only: ["Col 1", "Col B"])
       end
     end
 
     test "can optionally not return the header row" do
       @html
-      |> Hq.table(columns: ["Col 3", "Col 1"], headers: false)
+      |> Hq.table(only: ["Col 3", "Col 1"], headers: false)
       |> assert_eq([
         ["1,3", "1,1"],
         ["2,3", "2,1"],
@@ -441,7 +474,7 @@ defmodule HtmlQueryTest do
 
     test "when returning a list of maps, can filter by column index or title" do
       @html
-      |> Hq.table(as: :maps, columns: [0, 2])
+      |> Hq.table(as: :maps, only: [0, 2])
       |> assert_eq([
         %{"Col 1" => "1,1", "Col 3" => "1,3"},
         %{"Col 1" => "2,1", "Col 3" => "2,3"},
@@ -449,7 +482,7 @@ defmodule HtmlQueryTest do
       ])
 
       @html
-      |> Hq.table(as: :maps, columns: ["Col 3", "Col 1"])
+      |> Hq.table(as: :maps, only: ["Col 3", "Col 1"])
       |> assert_eq([
         %{"Col 1" => "1,1", "Col 3" => "1,3"},
         %{"Col 1" => "2,1", "Col 3" => "2,3"},
