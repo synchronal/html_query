@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 1.4.0
+
 - deprecate `HtmlQuery.table`'s `columns` option in favor of `only`
 - add `except` option to `HtmlQuery.table`
 
