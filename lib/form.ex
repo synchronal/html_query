@@ -1,4 +1,5 @@
 defmodule HtmlQuery.Form do
+  # @related [test](test/form_test.exs)
   @moduledoc """
   Form-handling functions. Most of the time, `HtmlQuery.form_fields/1` should be used instead of calling these
   functions directly.
