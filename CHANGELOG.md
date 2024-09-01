@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 1.4.1
+
 - `HtmlQuery.form_fields/1` uses the value of selected options when different from the inner text.
 
 ## 1.4.0
