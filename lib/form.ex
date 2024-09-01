@@ -65,7 +65,7 @@ defmodule HtmlQuery.Form do
   defp selected_option(select) do
     case HtmlQuery.find(select, "option[selected]") do
       nil -> ""
-      option -> HtmlQuery.text(option)
+      option -> HtmlQuery.attr(option, "value") || HtmlQuery.text(option)
     end
   end
 

@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.form_fields/1` uses the value of selected options when different from the inner text.
+
 ## 1.4.0
 
 - deprecate `HtmlQuery.table`'s `columns` option in favor of `only`

@@ -30,6 +30,17 @@ defmodule HtmlQuery.FormTest do
     |> assert_eq(%{favorite_color: ""})
   end
 
+  test "returns value of selects with value attributes" do
+    """
+    <form test-role="test-form">
+      <select name="favorite_color"><option>red</option><option value="blue">Blue</option><option selected value="green">Green</option></select>
+    </form>
+    """
+    |> Hq.find(test_role: "test-form")
+    |> Hq.form_fields()
+    |> assert_eq(%{favorite_color: "green"})
+  end
+
   test "excludes inputs with no name" do
     """
     <form test-role="test-form">
