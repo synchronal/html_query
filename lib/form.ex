@@ -13,7 +13,7 @@ defmodule HtmlQuery.Form do
       :term,
       &HtmlQuery.attr(&1, "value")
     )
-    |> form_field_values(html, "input[name][type=checkbox]", :list, &checked_value/1)
+    |> form_field_values(html, "input[name][type=checkbox]", :list_or_term, &checked_value/1)
     |> form_field_values(html, "input[name][type=radio]", :term, &checked_value/1)
     |> form_field_values(html, "textarea[name]", :term, &HtmlQuery.text/1)
     |> form_field_values(html, "select[name]", :term, &selected_option/1)
@@ -24,7 +24,7 @@ defmodule HtmlQuery.Form do
           map(),
           HtmlQuery.html(),
           HtmlQuery.Css.selector(),
-          :term | :list,
+          :term | :list | :list_or_term,
           (HtmlQuery.html() -> binary())
         ) :: map()
   defp form_field_values(acc, html, selector, value_type, value_fn) do
@@ -33,8 +33,19 @@ defmodule HtmlQuery.Form do
     |> Enum.reduce(acc, &form_field_value(&2, &1, value_type, value_fn))
   end
 
-  @spec form_field_value(map(), HtmlQuery.html(), :term | :list, (HtmlQuery.html() -> binary())) :: map()
+  @spec form_field_value(map(), HtmlQuery.html(), :term | :list | :list_or_term, (HtmlQuery.html() -> binary())) ::
+          map()
   defp form_field_value(acc, input, value_type, value_fn) do
+    value_type =
+      case value_type do
+        :list_or_term ->
+          name = HtmlQuery.attr(input, "name") || ""
+          if String.ends_with?(name, "[]"), do: :list, else: :term
+
+        other ->
+          other
+      end
+
     value = value_fn.(input)
     value = if value_type == :list, do: List.wrap(value), else: value
 

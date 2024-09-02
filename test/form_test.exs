@@ -119,7 +119,7 @@ defmodule HtmlQuery.FormTest do
     |> assert_eq(%{one_item_checked: "x", not_checked: nil, nested: %{one_item_checked: "b"}})
   end
 
-  test "uses the checked value for checkboxes" do
+  test "uses the last checked value for checkboxes with multiples" do
     """
     <form>
       <input type="checkbox" name="two_items_checked" value="a" />
@@ -129,11 +129,30 @@ defmodule HtmlQuery.FormTest do
       <input type="checkbox" name="nested[not_checked]" value="yes" />
       <input type="checkbox" name="nested[one_item_checked]" value="x" checked />
       <input type="checkbox" name="nested[one_item_checked]" value="y" />
+      <input type="checkbox" name="nested[two_items_checked]" value="x" checked />
+      <input type="checkbox" name="nested[two_items_checked]" value="y" />
+      <input type="checkbox" name="nested[two_items_checked]" value="z" checked />
     </form>
     """
     |> Hq.find("form")
     |> Hq.form_fields()
-    |> assert_eq(%{two_items_checked: ["b", "d"], nested: %{not_checked: [], one_item_checked: ["x"]}})
+    |> assert_eq(%{two_items_checked: "d", nested: %{one_item_checked: "x", not_checked: nil, two_items_checked: "z"}})
+  end
+
+  test "uses hidden inputs paired with checkboxes, only when unchecked" do
+    """
+    <form>
+      <input type="hidden" name="unchecked_default" value="a" />
+      <input type="checkbox" name="unchecked_default" value="b" />
+      <input type="hidden" name="nested[unchecked]" value="no" />
+      <input type="checkbox" name="nested[unchecked]" value="yes" />
+      <input type="hidden" name="nested[checked]" value="x" />
+      <input type="checkbox" name="nested[checked]" checked value="y" />
+    </form>
+    """
+    |> Hq.find("form")
+    |> Hq.form_fields()
+    |> assert_eq(%{unchecked_default: "a", nested: %{unchecked: "no", checked: "y"}})
   end
 
   test "handles arrays of checkboxes" do
@@ -141,19 +160,20 @@ defmodule HtmlQuery.FormTest do
     <form>
       <input type="checkbox" name="nested[value][]" value="x" checked />
       <input type="checkbox" name="nested[value][]" value="y" />
+      <input type="checkbox" name="nested[value][]" value="z" checked />
     </form>
     """
     |> Hq.find("form")
     |> Hq.form_fields()
-    |> assert_eq(%{nested: %{value: ["x"]}})
+    |> assert_eq(%{nested: %{value: ["x", "z"]}})
   end
 
   test "returns `[]` when no checkboxes are checked" do
     """
     <form>
-      <input type="checkbox" name="color" value="blue" />
-      <input type="checkbox" name="color" value="green" />
-      <input type="checkbox" name="color" value="red" />
+      <input type="checkbox" name="color[]" value="blue" />
+      <input type="checkbox" name="color[]" value="green" />
+      <input type="checkbox" name="color[]" value="red" />
     </form>
     """
     |> Hq.find("form")

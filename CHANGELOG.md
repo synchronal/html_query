@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.form_fields/1` returns singular value for checkboxes where name does not end in `[]`
+
 ## 1.4.1
 
 - `HtmlQuery.form_fields/1` uses the value of selected options when different from the inner text.

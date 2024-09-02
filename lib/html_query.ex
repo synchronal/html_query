@@ -218,14 +218,25 @@ defmodule HtmlQuery do
   %{x: nil}
   ```
 
-  All checked values of checkboxes are returned as a list, or `[]` is returned if no values are checked:
+  When evaluating checkboxes, the `name` attribute of the input defines whether or not a term or a
+  list will be returned. A name that ends in `[]` allows a browser to send multiple values, in which case
+  our form fields will return an array of values. A name that does not end in `[]` will evaluate to a
+  single value, the last checked value in a list:
 
   ```elixir
   iex> html = ~s|<form> <input type="checkbox" name="x" value="1" checked> <input type="checkbox" name="x" value="2" checked> </form>|
   iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
-  %{x: ["1", "2"]}
+  %{x: "2"}
 
   iex> html = ~s|<form> <input type="checkbox" name="x" value="1"> <input type="checkbox" name="x" value="2"> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{x: nil}
+
+  iex> html = ~s|<form> <input type="checkbox" name="x[]" value="1" checked> <input type="checkbox" name="x[]" value="2" checked> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{x: ["1", "2"]}
+
+  iex> html = ~s|<form> <input type="checkbox" name="x[]" value="1"> <input type="checkbox" name="x[]" value="2"> </form>|
   iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
   %{x: []}
   ```
