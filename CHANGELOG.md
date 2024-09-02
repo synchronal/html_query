@@ -2,7 +2,9 @@
 
 ## Unreleased changes
 
-- `HtmlQuery.form_fields/1` returns singular value for checkboxes where name does not end in `[]`
+## 2.0.0
+
+- `HtmlQuery.form_fields/1` returns singular value for checkboxes where name does not end in `[]`.
 
 ## 1.4.1
 
