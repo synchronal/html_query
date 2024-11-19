@@ -46,7 +46,7 @@ defmodule HtmlQuery.Form do
           other
       end
 
-    value = value_fn.(input)
+    value = value_fn.(input) |> parse_value()
     value = if value_type == :list, do: List.wrap(value), else: value
 
     map =
@@ -68,7 +68,7 @@ defmodule HtmlQuery.Form do
   defp checked_value(checkbox_or_radio) do
     case HtmlQuery.attr(checkbox_or_radio, "checked") do
       nil -> nil
-      _ -> HtmlQuery.attr(checkbox_or_radio, "value")
+      _ -> HtmlQuery.attr(checkbox_or_radio, "value") |> parse_value()
     end
   end
 
@@ -76,7 +76,7 @@ defmodule HtmlQuery.Form do
   defp selected_option(select) do
     case HtmlQuery.find(select, "option[selected]") do
       nil -> ""
-      option -> HtmlQuery.attr(option, "value") || HtmlQuery.text(option)
+      option -> (HtmlQuery.attr(option, "value") || HtmlQuery.text(option)) |> parse_value()
     end
   end
 
@@ -88,4 +88,10 @@ defmodule HtmlQuery.Form do
       _ -> input_name
     end
   end
+
+  # # #
+
+  defp parse_value("true"), do: true
+  defp parse_value("false"), do: false
+  defp parse_value(value), do: value
 end

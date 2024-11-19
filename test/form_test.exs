@@ -144,6 +144,11 @@ defmodule HtmlQuery.FormTest do
     <form>
       <input type="hidden" name="unchecked_default" value="a" />
       <input type="checkbox" name="unchecked_default" value="b" />
+      <input type="hidden" name="unchecked_boolean" value="false" />
+      <input type="checkbox" name="unchecked_boolean" value="true" />
+      <input type="hidden" name="checked_boolean" value="false" />
+      <input type="checkbox" name="checked_boolean" checked value="true" />
+      <input type="checkbox" name="nested[checked]" checked value="y" />
       <input type="hidden" name="nested[unchecked]" value="no" />
       <input type="checkbox" name="nested[unchecked]" value="yes" />
       <input type="hidden" name="nested[checked]" value="x" />
@@ -152,7 +157,12 @@ defmodule HtmlQuery.FormTest do
     """
     |> Hq.find("form")
     |> Hq.form_fields()
-    |> assert_eq(%{unchecked_default: "a", nested: %{unchecked: "no", checked: "y"}})
+    |> assert_eq(%{
+      unchecked_default: "a",
+      checked_boolean: true,
+      unchecked_boolean: false,
+      nested: %{unchecked: "no", checked: "y"}
+    })
   end
 
   test "handles arrays of checkboxes" do

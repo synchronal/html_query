@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.form_fields/1` returns `true` or `false` in place of strings.
+
 ## 2.0.0
 
 - `HtmlQuery.form_fields/1` returns singular value for checkboxes where name does not end in `[]`.

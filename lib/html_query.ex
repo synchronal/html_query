@@ -232,6 +232,15 @@ defmodule HtmlQuery do
   iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
   %{x: nil}
 
+  iex> html = ~s|<form>
+  ...>   <input type="hidden" name="x" value="false">
+  ...>   <input type="checkbox" name="x" value="true">
+  ...>   <input type="hidden" name="y" value="false">
+  ...>   <input type="checkbox" name="y" checked value="true">
+  ...> </form>|
+  iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
+  %{x: false, y: true}
+
   iex> html = ~s|<form> <input type="checkbox" name="x[]" value="1" checked> <input type="checkbox" name="x[]" value="2" checked> </form>|
   iex> html |> HtmlQuery.find("form") |> HtmlQuery.form_fields()
   %{x: ["1", "2"]}

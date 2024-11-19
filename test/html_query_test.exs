@@ -162,17 +162,19 @@ defmodule HtmlQueryTest do
     test "returns selects, textareas, and inputs that have a `value` attr as a name -> value map" do
       """
       <form test-role="test-form">
-        <input type="text" name="name" value="alice">
-        <input type="number" name="age" value="100">
-        <input type="email" name="email" value="">
+        <input type="text" name="name" value="alice" />
+        <input type="number" name="age" value="100" />
+        <input type="email" name="email" value="" />
+        <input type="hidden" name="alive" value="false" />
+        <input type="checkbox" name="alive" checked value="true" />
         <textarea name="about">Alice is 100</textarea>
         <select name="favorite_color"><option>red</option><option selected>blue</option><option>green</option></select>
-        <input type="submit" name="save">
+        <input type="submit" name="save" />
       </form>
       """
       |> Hq.find(test_role: "test-form")
       |> Hq.form_fields()
-      |> assert_eq(%{name: "alice", age: "100", email: "", about: "Alice is 100", favorite_color: "blue"})
+      |> assert_eq(%{name: "alice", age: "100", email: "", alive: true, about: "Alice is 100", favorite_color: "blue"})
     end
   end
 
