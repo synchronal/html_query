@@ -2,6 +2,11 @@
 
 ## Unreleased changes
 
+## 2.2.0
+
+- When a table cell contains a single input, use its value in `HtmlQuery.table/2` output. Useful
+  when a table column is a checkbox, or a disabled input.
+
 ## 2.1.0
 
 - `HtmlQuery.form_fields/1` returns `true` or `false` in place of strings.
