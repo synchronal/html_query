@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 2.1.0
+
 - `HtmlQuery.form_fields/1` returns `true` or `false` in place of strings.
 
 ## 2.0.0
