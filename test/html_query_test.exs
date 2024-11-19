@@ -491,6 +491,33 @@ defmodule HtmlQueryTest do
         %{"Col 1" => "3,1", "Col 3" => "3,3"}
       ])
     end
+
+    test "extracts input value when a column _only_ contains a single form field" do
+      """
+      <table>
+        <thead>
+          <tr><th>Col 1</th><th>Col 2</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><input type="checkbox" name="value" disabled checked value="true"></td></tr>
+          <tr><td>2</td><td><input type="checkbox" name="value" disabled value="true"></td></tr>
+          <tr><td>2.1</td><td><input type="hidden" name="value" value="false"><input type="checkbox" name="value" disabled value="true"></td></tr>
+          <tr><td>3</td><td><input type="text" name="value" readonly value="some value"></td></tr>
+          <tr><td>4</td><td><select name="value" disabled><option value="first"><option selected value="second"></select></td></tr>
+          <tr><td>5</td><td><input name="first" disabled value="first"><input name="second" disabled value="second"></td></tr>
+        </tbody>
+      </table>
+      """
+      |> Hq.table(as: :maps)
+      |> assert_eq([
+        %{"Col 1" => "1", "Col 2" => "true"},
+        %{"Col 1" => "2", "Col 2" => ""},
+        %{"Col 1" => "2.1", "Col 2" => "false"},
+        %{"Col 1" => "3", "Col 2" => "some value"},
+        %{"Col 1" => "4", "Col 2" => "second"},
+        %{"Col 1" => "5", "Col 2" => ""}
+      ])
+    end
   end
 
   describe "text" do

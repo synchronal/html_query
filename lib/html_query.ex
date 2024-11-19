@@ -481,6 +481,19 @@ defmodule HtmlQuery do
   end
 
   @spec table_row_values(html(), :all | [integer()]) :: [binary()]
-  defp table_row_values(row, columns),
-    do: row |> all("td,th") |> Moar.Enum.take_at(columns) |> Enum.map(&text/1)
+  defp table_row_values(row, columns) do
+    row |> all("td,th") |> Moar.Enum.take_at(columns) |> Enum.map(&table_cell_value/1)
+  end
+
+  defp table_cell_value(cell) do
+    case text(cell) do
+      "" -> form_fields(cell) |> to_table_cell()
+      text -> text
+    end
+  end
+
+  defp to_table_cell(map) when map_size(map) == 1,
+    do: Map.values(map) |> List.first() |> to_string()
+
+  defp to_table_cell(_map), do: ""
 end
