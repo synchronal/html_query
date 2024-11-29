@@ -2,6 +2,10 @@
 
 ## Unreleased changes
 
+## 3.0.1
+
+- Fix doc typo
+
 ## 3.0.0
 
 - When a table cell contains a single input, use its value in `HtmlQuery.table/2` output. Useful
