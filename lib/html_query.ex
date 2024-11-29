@@ -279,7 +279,7 @@ defmodule HtmlQuery do
   * `except` - returns all the columns except the ones whose indices or names are given. `only` and `except` can be
     combined to further reduce the set of columns.
   * `headers` - if `true` (the default), returns the list of headers along with the rows. Ignored if `as` option is
-    `:map`.
+    `:maps`.
 
   Deprecated options:
   * `columns` - use `only` instead.
