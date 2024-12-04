@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 3.1.0
+
 - Raise with an explicit message when all or find are given nil.
 
 ## 3.0.1
