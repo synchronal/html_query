@@ -1,5 +1,5 @@
 defmodule HtmlQuery.CssTest do
-  # @related [subject](/lib/css.ex)
+  # @related [subject](/lib/html_query/css.ex)
 
   use Test.SimpleCase, async: true
 

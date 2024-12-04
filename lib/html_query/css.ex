@@ -1,5 +1,5 @@
 defmodule HtmlQuery.Css do
-  # @related [test](/test/css_test.exs)
+  # @related [test](/test/html_query/css_test.exs)
 
   @moduledoc """
   Constructs CSS selectors via Elixir data structures. See `selector/1` for details.

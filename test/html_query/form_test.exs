@@ -1,5 +1,5 @@
 defmodule HtmlQuery.FormTest do
-  # @related [subject](lib/form.ex)
+  # @related [subject](lib/html_query/form.ex)
   use Test.SimpleCase, async: true
   alias HtmlQuery, as: Hq
 
