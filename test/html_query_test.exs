@@ -56,6 +56,18 @@ defmodule HtmlQueryTest do
       |> Hq.all(id: "p2", class: "para")
       |> assert_eq([{"p", [{"id", "p2"}, {"class", "para"}], ["P2"]}])
     end
+
+    test "raises when given nil" do
+      assert_raise HtmlQuery.QueryError,
+                   """
+                   HtmlQuery.all expected to have been given HTML
+
+                   HTML: nil
+
+                   Selector: [data-role='thing']
+                   """,
+                   fn -> Hq.all(nil, data_role: "thing") end
+    end
   end
 
   describe "attr" do
@@ -116,6 +128,18 @@ defmodule HtmlQueryTest do
 
       html |> Hq.find("p") |> assert_eq({"p", [], ["P1"]})
       html |> Hq.find("glorp") |> assert_eq(nil)
+    end
+
+    test "raises when given nil" do
+      assert_raise HtmlQuery.QueryError,
+                   """
+                   HtmlQuery.find expected to have been given HTML
+
+                   HTML: nil
+
+                   Selector: [data-role='thing']
+                   """,
+                   fn -> Hq.find(nil, data_role: "thing") end
     end
   end
 

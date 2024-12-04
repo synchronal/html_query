@@ -117,6 +117,16 @@ defmodule HtmlQuery do
   ```
   """
   @spec all(html(), HtmlQuery.Css.selector()) :: Floki.html_tree()
+  def all(nil, selector) do
+    raise(QueryError, """
+    HtmlQuery.all expected to have been given HTML
+
+    HTML: nil
+
+    Selector: #{HtmlQuery.Css.selector(selector)}
+    """)
+  end
+
   def all(html, selector),
     do: html |> parse() |> Floki.find(HtmlQuery.Css.selector(selector))
 
@@ -130,6 +140,16 @@ defmodule HtmlQuery do
   ```
   """
   @spec find(html(), HtmlQuery.Css.selector()) :: Floki.html_node() | nil
+  def find(nil, selector) do
+    raise(QueryError, """
+    HtmlQuery.find expected to have been given HTML
+
+    HTML: nil
+
+    Selector: #{HtmlQuery.Css.selector(selector)}
+    """)
+  end
+
   def find(html, selector),
     do: all(html, selector) |> List.first()
 
