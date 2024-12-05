@@ -557,6 +557,12 @@ defmodule HtmlQueryTest do
       @html |> Hq.find("div") |> Hq.text() |> assert_eq("P1 P2  a span P3")
     end
 
+    test "can optionally join parts with a different separator" do
+      {"div", [], ["foo", "bar"]} |> Hq.text() |> assert_eq("foo bar")
+      {"div", [], ["foo", "bar"]} |> Hq.text("*") |> assert_eq("foo*bar")
+      {"div", [], ["foo", "bar"]} |> Hq.text("") |> assert_eq("foobar")
+    end
+
     test "requires the use of `Enum.map` to get a list" do
       @html |> Hq.all("p") |> Enum.map(&Hq.text/1) |> assert_eq(["P1", "P2  a span", "P3"])
     end

@@ -28,7 +28,7 @@ defmodule HtmlQuery do
   | `form_fields/1` | returns the names and values of form fields as a map    |
   | `meta_tags/1`   | returns the names and values of metadata fields         |
   | `table/2`       | returns the cells of a table as a list of lists or maps |
-  | `text/1`        | returns the text contents as a single string            |
+  | `text/2`        | returns the text contents as a single string            |
 
   ## Parsing functions
 
@@ -384,7 +384,8 @@ defmodule HtmlQuery do
   end
 
   @doc """
-  Returns the text value of `html`.
+  Returns the text value of `html`, separating substrings with a space by default. (Floki will split text into
+  substrings.) You can pass a separator as the second argument; sometimes it's useful to pass an empty string.
 
   ```elixir
   iex> html = ~s|<select> <option value="a" selected>apples</option> <option value="b">bananas</option> </select>|
@@ -392,12 +393,12 @@ defmodule HtmlQuery do
   "apples"
   ```
   """
-  @spec text(html()) :: binary()
-  def text(html) do
+  @spec text(html(), String.t()) :: binary()
+  def text(html, separator \\ " ") do
     html
     |> parse()
     |> first!("Consider using Enum.map(html, &#{@module_name}.text/1)")
-    |> Floki.text(sep: " ")
+    |> Floki.text(sep: separator)
     |> String.trim()
   end
 

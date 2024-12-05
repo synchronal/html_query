@@ -2,6 +2,9 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.text` can now take a separator string as an argument, which is used when joining multiple text fragments.
+  It defaults to " ".
+
 ## 3.1.0
 
 - Raise with an explicit message when all or find are given nil.
