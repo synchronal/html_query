@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 4.0.0
+
 - Drop support for Elixir 1.15. Test against Elixir 1.18.
 
 ## 3.2.0

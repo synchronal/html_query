@@ -2,7 +2,7 @@ defmodule HtmlQuery.MixProject do
   use Mix.Project
 
   @scm_url "https://github.com/synchronal/html_query"
-  @version "3.2.0"
+  @version "4.0.0"
 
   def application do
     [
@@ -17,7 +17,7 @@ defmodule HtmlQuery.MixProject do
       description: "HTML query functions",
       dialyzer: dialyzer(),
       docs: docs(),
-      elixir: "~> 1.15",
+      elixir: "~> 1.16",
       elixirc_paths: elixirc_paths(Mix.env()),
       homepage_url: @scm_url,
       name: "HtmlQuery",
