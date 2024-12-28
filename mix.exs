@@ -41,7 +41,7 @@ defmodule HtmlQuery.MixProject do
       {:mix_audit, "~> 2.0", only: :dev, runtime: false},
       {:mix_test_watch, "~> 1.2",
        only: :dev, runtime: false, github: "eahanson/mix-test.watch", branch: "clear-scrollback"},
-      {:moar, "~> 1.47"}
+      {:moar, "~> 2.0"}
     ]
   end
 
