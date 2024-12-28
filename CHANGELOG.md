@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Drop support for Elixir 1.15. Test against Elixir 1.18.
+
 ## 3.2.0
 
 - `HtmlQuery.text` can now take a separator string as an argument, which is used when joining multiple text fragments.
