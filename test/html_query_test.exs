@@ -427,6 +427,17 @@ defmodule HtmlQueryTest do
       ])
     end
 
+    test "can filter one column by index via `only: ...`" do
+      @html
+      |> Hq.table(only: 2)
+      |> assert_eq([
+        "Col 3",
+        "1,3",
+        "2,3",
+        "3,3"
+      ])
+    end
+
     test "can reject certain columns by index via `except: [...]`" do
       @html
       |> Hq.table(except: [0, 2])
@@ -435,6 +446,17 @@ defmodule HtmlQueryTest do
         ["1,2"],
         ["2,2"],
         ["3,2"]
+      ])
+    end
+
+    test "can reject one columns by index via `except: ...`" do
+      @html
+      |> Hq.table(except: 2)
+      |> assert_eq([
+        ["Col 1", "Col 2"],
+        ["1,1", "1,2"],
+        ["2,1", "2,2"],
+        ["3,1", "3,2"]
       ])
     end
 
@@ -449,6 +471,17 @@ defmodule HtmlQueryTest do
       ])
     end
 
+    test "can filter a column by column title via `only: ...`" do
+      @html
+      |> Hq.table(only: "Col 3")
+      |> assert_eq([
+        "Col 3",
+        "1,3",
+        "2,3",
+        "3,3"
+      ])
+    end
+
     test "can reject certain columns by column title via `except: [...]`" do
       @html
       |> Hq.table(except: ["Col 1", "Col 3"])
@@ -457,6 +490,17 @@ defmodule HtmlQueryTest do
         ["1,2"],
         ["2,2"],
         ["3,2"]
+      ])
+    end
+
+    test "can reject a column by column title via `except: ...`" do
+      @html
+      |> Hq.table(except: "Col 1")
+      |> assert_eq([
+        ["Col 2", "Col 3"],
+        ["1,2", "1,3"],
+        ["2,2", "2,3"],
+        ["3,2", "3,3"]
       ])
     end
 
