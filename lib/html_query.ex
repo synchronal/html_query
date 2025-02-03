@@ -404,6 +404,49 @@ defmodule HtmlQuery do
   end
 
   @doc """
+  Returns a tuple containing the contents of the given table's header row and its data rows. It is meant to be used on
+  relatively simple tables: it will return incorrect data when `colspan` attributes exist; if there are no
+  `<thead>` elements, it assumes that the first row of data is the header row. If the table has one or more `<thead>`
+  elements, then the last `<tr>` of the last `<thead>` will be considered the header row.
+
+  ```elixir
+  iex> html =
+  ...>   "<table>" <>
+  ...>   "  <thead>" <>
+  ...>   "    <tr> <th>A</th> <th>B</th> <th>C</th> </tr>" <>
+  ...>   "  </thead> " <>
+  ...>   "  <tbody>" <>
+  ...>   "    <tr> <td>1</td> <td>2</td> <td>3</td> </tr>" <>
+  ...>   "    <tr> <td>4</td> <td>5</td> <td>6</td> </tr>" <>
+  ...>   "  </tbody>" <>
+  ...>   "</table>"
+  iex> HtmlQuery.table_header_and_data(html)
+  {
+    ["A", "B", "C"],
+    [
+      ["1", "2", "3"],
+      ["4", "5", "6"]
+    ]
+  }
+  ```
+  """
+  @spec table_header_and_data(html()) :: {list(String.t()), list(list(String.t()))}
+  def table_header_and_data(html) do
+    html = parse(html)
+
+    case html |> all("thead") do
+      [] ->
+        [header_row | data_rows] = all(html, "tr")
+        {table_row_values(header_row), Enum.map(data_rows, &table_row_values/1)}
+
+      theads ->
+        last_thead_row = theads |> List.last() |> all("tr") |> List.last() |> table_row_values()
+        data_rows = html |> all("tbody tr") |> Enum.map(&table_row_values/1)
+        {last_thead_row, data_rows}
+    end
+  end
+
+  @doc """
   Returns the text value of `html`, separating substrings with a space by default. (Floki will split text into
   substrings.) You can pass a separator as the second argument; sometimes it's useful to pass an empty string.
 

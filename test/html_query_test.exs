@@ -588,6 +588,87 @@ defmodule HtmlQueryTest do
     end
   end
 
+  describe "table_header_and_data" do
+    test "with a simple table, assumes that the first row is the header row" do
+      """
+      <table>
+        <tr><th>Col 1</th><th>Col 2</th></tr>
+        <tr><td>R1 C1</td><td>R1 C2</td></tr>
+        <tr><td>R2 C1</td><td>R2 C2</td></tr>
+      </table>
+      """
+      |> Hq.table_header_and_data()
+      |> assert_eq({
+        ["Col 1", "Col 2"],
+        [
+          ["R1 C1", "R1 C2"],
+          ["R2 C1", "R2 C2"]
+        ]
+      })
+    end
+
+    test "with a table containing a simple thead and tbody" do
+      """
+      <table>
+        <thead>
+          <tr><th>Col 1</th><th>Col 2</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>R1 C1</td><td>R1 C2</td></tr>
+          <tr><td>R2 C1</td><td>R2 C2</td></tr>
+        </tbody>
+      </table>
+      """
+      |> Hq.table_header_and_data()
+      |> assert_eq({
+        ["Col 1", "Col 2"],
+        [
+          ["R1 C1", "R1 C2"],
+          ["R2 C1", "R2 C2"]
+        ]
+      })
+    end
+
+    test "with a table containing multiple thead and tbodies" do
+      """
+      <table>
+        <thead>
+          <tr><th>AAAAA</th><th>BBBBB</th></tr>
+          <tr><th>CCCCC</th><th>DDDDD</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>R1 C1</td><td>R1 C2</td></tr>
+          <tr><td>R2 C1</td><td>R2 C2</td></tr>
+        </tbody>
+        <thead>
+          <tr><th>EEEEE</th><th>FFFFF</th></tr>
+          <tr><th>Col 1</th><th>Col 2</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>R3 C1</td><td>R3 C2</td></tr>
+          <tr><td>R4 C1</td><td>R4 C2</td></tr>
+        </tbody>
+        <tbody>
+          <tr><td>R5 C1</td><td>R5 C2</td></tr>
+          <tr><td>R6 C1</td><td>R6 C2</td></tr>
+        </tbody>
+      </table>
+      """
+      |> Hq.table_header_and_data()
+      |> assert_eq({
+        ["Col 1", "Col 2"],
+        [
+          ["R1 C1", "R1 C2"],
+          ["R2 C1", "R2 C2"],
+          ["R3 C1", "R3 C2"],
+          ["R4 C1", "R4 C2"],
+          ["R5 C1", "R5 C2"],
+          ["R6 C1", "R6 C2"]
+        ]
+      })
+    end
+  end
+
   describe "text" do
     @html """
     <div>
