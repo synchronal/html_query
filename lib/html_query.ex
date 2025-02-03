@@ -288,21 +288,27 @@ defmodule HtmlQuery do
     do: html |> parse() |> extract_meta_tags()
 
   @doc """
-  Returns the contents of the table as a list of lists.
+  Returns the contents of the table as a list of lists, or as a single list if only one column is selected via
+  the `:only` or `:except` options. Headers are returned by default (see the `:headers` option).
 
   Options:
-  * `as` - if `:lists` (the default), returns the table as a list of lists; if `:maps`, returns the table as a list of
-    maps.
-  * `only` - a list of the indices of the columns to return; a list of column headers (as strings) to return,
-    assuming that the first row of the table is the columns names; or `:all` to return all columns (which is the same
-    as not specifying this option at all).
-  * `except` - returns all the columns except the ones whose indices or names are given. `only` and `except` can be
-    combined to further reduce the set of columns.
-  * `headers` - if `true` (the default), returns the list of headers along with the rows. Ignored if `as` option is
-    `:maps`.
+  * `:as`
+      - if `:lists` (the default), returns the table as a list of lists; or
+      - if `:maps`, returns the table as a list of maps.
+  * `:only`
+      - a list of the indices of the columns to return; or
+      - a single index of the column, which will return a single list, rather than a list of lists; or
+      - a list of column header names to return, assuming that the first row of the table is the column names; or
+      - a single column header name, which will return a single list, rather than a list of lists; or
+      - `:all` to return all columns (which is the same as not specifying this option at all)
+  * `:except`
+      - returns all the columns except the ones whose indices or names are given. `only` and `except` can be
+        combined to further reduce the set of columns
+  * `:headers`
+      - if `true` (the default), returns the list of headers along with the rows. Ignored if `as` option is `:maps`
 
   Deprecated options:
-  * `columns` - use `only` instead.
+  * `:columns` - use `only` instead.
 
   ```elixir
   iex> html = "<table> <tr><th>A</th><th>B</th><th>C</th></tr> <tr><td>1</td><td>2</td><td>3</td></tr> </table>"
@@ -325,11 +331,17 @@ defmodule HtmlQuery do
     ["C", "A"],
     ["3", "1"]
   ]
+  iex> HtmlQuery.table(html, only: 2)
+  ["C", "3"]
   iex> HtmlQuery.table(html, only: ["C", "A"])
   [
     ["C", "A"],
     ["3", "1"]
   ]
+  iex> HtmlQuery.table(html, only: "C")
+  ["C", "3"]
+  iex> HtmlQuery.table(html, only: "C", headers: false)
+  ["3"]
   iex> HtmlQuery.table(html, except: ["C", "A"])
   [
     ["B"],
@@ -350,17 +362,22 @@ defmodule HtmlQuery do
       case Keyword.get(opts, :only) || Keyword.get(opts, :columns, :all) do
         :all -> Range.to_list(0..(length(header_row_values) - 1))
         [first | _] = names when is_binary(first) -> Moar.Enum.find_indices!(header_row_values, names)
+        first = name when is_binary(first) -> Moar.Enum.find_indices!(header_row_values, [name]) |> List.first()
         [first | _] = indices when is_integer(first) -> indices
+        first = index when is_integer(first) -> index
       end
 
     except =
       case Keyword.get(opts, :except) do
         nil -> []
         [first | _] = names when is_binary(first) -> Moar.Enum.find_indices!(header_row_values, names)
+        first = name when is_binary(first) -> Moar.Enum.find_indices!(header_row_values, [name]) |> List.first()
         [first | _] = indices when is_integer(first) -> indices
+        first = index when is_integer(first) -> index
       end
 
-    columns = only -- except
+    columns = List.wrap(only) -- List.wrap(except)
+    single? = length(columns) == 1 && !is_list(only) && (except == [] || !is_list(except))
 
     case Keyword.get(opts, :as, :lists) do
       :lists ->
@@ -371,12 +388,15 @@ defmodule HtmlQuery do
             other -> raise "Expected `:headers` option to be `true` or `false`, got: #{other}"
           end
 
-        Enum.map(rows, &table_row_values(&1, columns))
+        rows
+        |> Enum.map(&table_row_values(&1, columns))
+        |> then(fn rows -> if single?, do: List.flatten(rows), else: rows end)
 
       :maps ->
         rows
         |> Enum.map(&table_row_values(&1, columns))
         |> Moar.Enum.lists_to_maps(:first_list)
+        |> then(fn rows -> if single?, do: List.flatten(rows), else: rows end)
 
       other ->
         raise "Expected `:as` option to be `:lists` or `:maps`, got: #{other}"

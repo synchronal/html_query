@@ -2,9 +2,11 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.table` will return a single column if `:only` or `:except` is a single column index or name.
+
 ## 4.0.0
 
-- Drop support for Elixir 1.15. Test against Elixir 1.18.
+- **Breaking changes**: Drop support for Elixir 1.15. Test against Elixir 1.18.
 
 ## 3.2.0
 
