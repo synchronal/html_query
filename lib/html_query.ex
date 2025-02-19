@@ -497,6 +497,9 @@ defmodule HtmlQuery do
 
   # # # Private Functions
 
+  defp empty_elements(0), do: []
+  defp empty_elements(count), do: for(_ <- 1..count, do: nil)
+
   @spec extract_meta_tags(html()) :: [map()]
   defp extract_meta_tags(html),
     do: all(html, "meta") |> Enum.map(fn {"meta", attrs, _} -> Map.new(attrs) end)
@@ -523,8 +526,17 @@ defmodule HtmlQuery do
 
   @spec table_row_values(html(), :all | [integer()]) :: [binary()]
   defp table_row_values(row, columns) do
-    row |> all("td,th") |> Moar.Enum.take_at(columns) |> Enum.map(&table_cell_value/1)
+    row
+    |> all("td,th")
+    |> Enum.reduce([], fn el, elements ->
+      colspan = attr(el, "colspan") |> Moar.Term.when_present(&String.to_integer/1, 1)
+      elements ++ [el | empty_elements(colspan - 1)]
+    end)
+    |> Moar.Enum.take_at(columns)
+    |> Enum.map(&table_cell_value/1)
   end
+
+  defp table_cell_value(nil), do: nil
 
   defp table_cell_value(cell) do
     case text(cell) do

@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- `HtmlQuery.table` includes nil column values for cells that are missing because of previous colspans.
+
 ## 4.1.0
 
 - `HtmlQuery.table` will return a single column if `:only` or `:except` is a single column index or name.

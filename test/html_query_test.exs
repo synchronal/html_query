@@ -405,6 +405,26 @@ defmodule HtmlQueryTest do
       ])
     end
 
+    test "returns nil for cells where colspan covers missing cells" do
+      """
+      <table>
+        <thead>
+          <tr><th>Col 1</th><th>Col 2</th><th>Col 3</th></tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2">1,1</td><td>1,3</td></tr>
+          <tr><td>2,1</td><td colspan="2">2,2</td></tr>
+        </tbody>
+      </table>
+      """
+      |> Hq.table()
+      |> assert_eq([
+        ["Col 1", "Col 2", "Col 3"],
+        ["1,1", nil, "1,3"],
+        ["2,1", "2,2", nil]
+      ])
+    end
+
     test "`:all` columns can be requested explicitly" do
       @html
       |> Hq.table(only: :all)
@@ -557,6 +577,25 @@ defmodule HtmlQueryTest do
         %{"Col 1" => "1,1", "Col 3" => "1,3"},
         %{"Col 1" => "2,1", "Col 3" => "2,3"},
         %{"Col 1" => "3,1", "Col 3" => "3,3"}
+      ])
+    end
+
+    test "when returning maps, returns nil for cells where colspan covers missing cells" do
+      """
+      <table>
+        <thead>
+          <tr><th>Col 1</th><th>Col 2</th><th>Col 3</th></tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2">Value 1</td><td>Value 2</td></tr>
+          <tr><td>Value 1</td><td colspan="2">Value 2</td></tr>
+        </tbody>
+      </table>
+      """
+      |> Hq.table(as: :maps)
+      |> assert_eq([
+        %{"Col 1" => "Value 1", "Col 2" => nil, "Col 3" => "Value 2"},
+        %{"Col 1" => "Value 1", "Col 2" => "Value 2", "Col 3" => nil}
       ])
     end
 
