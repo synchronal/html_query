@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Add sponsorship link.
+
 ## 4.2.0
 
 - `HtmlQuery.table` includes nil column values for cells that are missing because of previous colspans.
