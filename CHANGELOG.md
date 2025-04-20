@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 4.3.0
+
 - Add an `update` option to `HtmlQuery.table`, which is a function that is called for every table cell and updates
   each cell's contents.
 

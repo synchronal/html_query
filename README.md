@@ -30,7 +30,7 @@ This library is tested against the most recent 3 versions of Elixir and Erlang.
 ```elixir
 def deps do
   [
-    {:html_query, "~> 4.1"}
+    {:html_query, "~> 4.3"}
   ]
 end
 ```
