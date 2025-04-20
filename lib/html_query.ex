@@ -306,6 +306,8 @@ defmodule HtmlQuery do
         combined to further reduce the set of columns
   * `:headers`
       - if `true` (the default), returns the list of headers along with the rows. Ignored if `as` option is `:maps`
+  * `:update`
+      - accepts a function that will be used to transform each header and body cell
 
   Deprecated options:
   * `:columns` - use `only` instead.
@@ -351,12 +353,18 @@ defmodule HtmlQuery do
   [
     ["3", "1"]
   ]
+  iex> HtmlQuery.table(html, update: &String.downcase/1)
+  [
+    ["a", "b", "c"],
+    ["1", "2", "3"]
+  ]
   ```
   """
   @spec table(html(), keyword()) :: [[]] | [map()]
   def table(html, opts \\ []) do
     rows = [header_row | non_header_rows] = html |> parse() |> all("tr")
     header_row_values = header_row |> all("th,td") |> Enum.map(&text/1)
+    update_fn = Keyword.get(opts, :update, &Function.identity/1)
 
     only =
       case Keyword.get(opts, :only) || Keyword.get(opts, :columns, :all) do
@@ -389,12 +397,12 @@ defmodule HtmlQuery do
           end
 
         rows
-        |> Enum.map(&table_row_values(&1, columns))
+        |> Enum.map(&table_row_values(&1, columns, update_fn))
         |> then(fn rows -> if single?, do: List.flatten(rows), else: rows end)
 
       :maps ->
         rows
-        |> Enum.map(&table_row_values(&1, columns))
+        |> Enum.map(&table_row_values(&1, columns, update_fn))
         |> Moar.Enum.lists_to_maps(:first_list)
         |> then(fn rows -> if single?, do: List.flatten(rows), else: rows end)
 
@@ -524,8 +532,8 @@ defmodule HtmlQuery do
     """
   end
 
-  @spec table_row_values(html(), :all | [integer()]) :: [binary()]
-  defp table_row_values(row, columns) do
+  @spec table_row_values(html(), :all | [integer()], fun()) :: [binary()]
+  defp table_row_values(row, columns, update_fn) do
     row
     |> all("td,th")
     |> Enum.reduce([], fn el, elements ->
@@ -533,16 +541,17 @@ defmodule HtmlQuery do
       elements ++ [el | empty_elements(colspan - 1)]
     end)
     |> Moar.Enum.take_at(columns)
-    |> Enum.map(&table_cell_value/1)
+    |> Enum.map(&table_cell_value(&1, update_fn))
   end
 
-  defp table_cell_value(nil), do: nil
+  defp table_cell_value(nil, _), do: nil
 
-  defp table_cell_value(cell) do
+  defp table_cell_value(cell, update_fn) do
     case text(cell) do
       "" -> form_fields(cell) |> to_table_cell()
       text -> text
     end
+    |> update_fn.()
   end
 
   defp to_table_cell(map) when map_size(map) == 1,

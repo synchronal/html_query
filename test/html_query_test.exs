@@ -625,6 +625,26 @@ defmodule HtmlQueryTest do
         %{"Col 1" => "5", "Col 2" => ""}
       ])
     end
+
+    test "can accept an update function which updates all cells" do
+      """
+      <table>
+        <thead>
+          <tr><th>Col 1</th><th>Col 2</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Apple</td><td>Acorn</td></tr>
+          <tr><td>Banana</td><td>Bug</td></tr>
+        </tbody>
+      </table>
+      """
+      |> Hq.table(update: &String.downcase/1)
+      |> assert_eq([
+        ["col 1", "col 2"],
+        ["apple", "acorn"],
+        ["banana", "bug"]
+      ])
+    end
   end
 
   describe "text" do
