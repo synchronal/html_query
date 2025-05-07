@@ -182,6 +182,62 @@ defmodule HtmlQueryTest do
     end
   end
 
+  describe "form" do
+    @form """
+    <form test-role="test-form">
+      <input type="text" name="name" value="alice" />
+      <input type="number" name="age" value="100" />
+      <input type="email" name="email-address" value="alice@example.com" />
+      <input type="hidden" name="alive" value="false" />
+      <input type="checkbox" name="alive" checked value="true" />
+      <textarea name="about">Alice is 100</textarea>
+      <select name="favorite_color"><option>red</option><option selected>blue</option><option>green</option></select>
+      <input type="submit" name="save" />
+    </form>
+    """
+
+    test "returns the exact contents of the form without any post-processing" do
+      @form
+      |> Hq.find(test_role: "test-form")
+      |> Hq.form(as: :lists)
+      |> assert_eq([
+        [name: "name", type: "text", value: "alice"],
+        [name: "age", type: "number", value: "100"],
+        [name: "email-address", type: "email", value: "alice@example.com"],
+        [name: "alive", type: "hidden", value: "false"],
+        [checked: "checked", name: "alive", type: "checkbox", value: "true"],
+        [name: "about", text: "Alice is 100", type: "textarea"],
+        [
+          name: "favorite_color",
+          options: [[text: "red"], [selected: "selected", text: "blue"], [text: "green"]],
+          type: "select"
+        ],
+        [name: "save", type: "submit"]
+      ])
+    end
+
+    test "can return the results as a map" do
+      @form
+      |> Hq.find(test_role: "test-form")
+      |> Hq.form(as: :map)
+      |> assert_eq(%{
+        name: [[type: "text", value: "alice"]],
+        age: [[type: "number", value: "100"]],
+        email_address: [[type: "email", value: "alice@example.com"]],
+        alive: [[type: "hidden", value: "false"], [checked: "checked", type: "checkbox", value: "true"]],
+        about: [[text: "Alice is 100", type: "textarea"]],
+        favorite_color: [
+          [
+            options: [[text: "red"], [selected: "selected", text: "blue"], [text: "green"]],
+            type: "select"
+          ]
+        ],
+        save: [[type: "submit"]]
+      })
+    end
+  end
+
+  # soon to be deprecated
   describe "form_fields" do
     test "returns selects, textareas, and inputs that have a `value` attr as a name -> value map" do
       """

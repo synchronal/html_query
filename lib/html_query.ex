@@ -185,6 +185,28 @@ defmodule HtmlQuery do
   end
 
   @doc """
+  The beginnings of an experimental replacement for `HtmlQuery.form_fields/1`.
+
+  Returns all the fields of the supplied form, in order, without trying to emulate what a web framework might
+  convert the values to.
+
+  The `:as` option can be `:lists` or `:map`. When `:lists` (the default), each input's attributes are returned as
+  a list in the order found in the HTML, and therefore the function returns a list of lists. Because HTML allows
+  multiple inputs with the same name, no de-duplication is performed. When `:map`, the fields are returned as a
+  map, where the keys are the "name" attribute (converted into snake-cased atoms) and the values are a list of
+  lists of attributes (to handle the case when there are multiple inputs with the same name).
+  """
+  @spec form(html(), Keyword.t()) :: [Keyword.t()]
+  def form(html, opts \\ []) do
+    as = Keyword.get(opts, :as, :lists)
+
+    html
+    |> all("input, select, textarea")
+    |> Enum.map(&form_input/1)
+    |> form_results(as)
+  end
+
+  @doc """
   Returns a map containing the form fields of form `selector` in `html`. Because it returns a map, any information
   about the order of form fields is lost.
 
@@ -531,6 +553,65 @@ defmodule HtmlQuery do
     #{hint}
     """
   end
+
+  # # #
+
+  defp form_input({type, attrs, children}) do
+    attrs
+    |> Keyword.new(fn {k, v} -> {String.to_atom(k), v} end)
+    |> put_form_input_type(type)
+    |> add_form_input_attrs(type, children)
+    |> Enum.sort_by(fn {k, _v} -> k end)
+  end
+
+  defp put_form_input_type(attrs, type) do
+    type =
+      if type == "input",
+        do: Keyword.get(attrs, :type, "unknown"),
+        else: type
+
+    attrs |> Keyword.delete(:type) |> Keyword.put(:type, type)
+  end
+
+  defp add_form_input_attrs(attrs, "select", children) do
+    options =
+      all(children, "option")
+      |> List.foldr([], fn {_, option_attrs, text}, acc ->
+        option =
+          Keyword.new(option_attrs, fn {k, v} -> {String.to_atom(k), v} end)
+          |> Keyword.put(:text, Enum.join(text))
+          |> Enum.sort_by(fn {k, _v} -> k end)
+
+        [option | acc]
+      end)
+
+    Keyword.put(attrs, :options, options)
+  end
+
+  defp add_form_input_attrs(attrs, "textarea", children),
+    do: Keyword.put(attrs, :text, Enum.join(children))
+
+  defp add_form_input_attrs(attrs, _, _),
+    do: attrs
+
+  defp form_results(results, :lists), do: results
+
+  defp form_results(results, :map) do
+    Enum.reduce(results, %{}, fn result, acc ->
+      {key, attrs} = Keyword.pop(result, :name)
+      key = key |> Moar.String.to_case(:snake_case) |> Moar.Atom.atomize()
+
+      {_, acc} =
+        Map.get_and_update(acc, key, fn
+          nil -> {nil, [attrs]}
+          value -> {value, List.insert_at(value, -1, attrs)}
+        end)
+
+      acc
+    end)
+  end
+
+  # # #
 
   @spec table_row_values(html(), :all | [integer()], fun()) :: [binary()]
   defp table_row_values(row, columns, update_fn) do
