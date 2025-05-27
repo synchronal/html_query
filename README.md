@@ -39,7 +39,7 @@ file an issue or contact us at [contact@reflective.dev](mailto:contact@reflectiv
 ```elixir
 def deps do
   [
-    {:html_query, "~> 4.3"}
+    {:html_query, "~> 4.4"}
   ]
 end
 ```

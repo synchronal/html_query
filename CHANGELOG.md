@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 4.4.0
+
 - Relax restriction on version of `moar` dependency
 
 ## 4.3.0
