@@ -43,8 +43,7 @@ defmodule HtmlQuery.MixProject do
       {:floki, "~> 0.32"},
       {:jason, "~> 1.3", optional: true},
       {:mix_audit, "~> 2.0", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 1.2",
-       only: :dev, runtime: false, github: "eahanson/mix-test.watch", branch: "clear-scrollback"},
+      {:mix_test_watch, "~> 1.4", only: :dev, runtime: false},
       {:moar, "> 2.0.0"}
     ]
   end
