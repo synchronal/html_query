@@ -10,6 +10,11 @@ defmodule HtmlQuery.MixProject do
     ]
   end
 
+  def cli,
+    do: [
+      preferred_envs: [credo: :test, dialyzer: :test]
+    ]
+
   def project do
     [
       app: :html_query,
@@ -22,7 +27,6 @@ defmodule HtmlQuery.MixProject do
       homepage_url: @scm_url,
       name: "HtmlQuery",
       package: package(),
-      preferred_cli_env: [credo: :test, dialyzer: :test],
       source_url: @scm_url,
       start_permanent: Mix.env() == :prod,
       version: @version
