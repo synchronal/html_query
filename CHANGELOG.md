@@ -2,6 +2,9 @@
 
 ## Unreleased changes
 
+- Update deps.
+- Use Elixir 1.20.2, Erlang 29.0.2.
+
 ## 4.4.0
 
 - Relax restriction on version of `moar` dependency
